@@ -1,0 +1,123 @@
+spring:
+  application:
+    name: easybody
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:easybody}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        jdbc:
+          lob:
+            non_contextual_creation: true
+    show-sql: ${SHOW_SQL:false}
+
+  sql:
+    init:
+      platform: postgresql
+
+# AWS Configuration
+aws:
+  region: ${AWS_REGION:us-east-1}
+  cognito:
+    user-pool-id: ${COGNITO_USER_POOL_ID:}
+    client-id: ${COGNITO_CLIENT_ID:}
+    jwks-url: ${COGNITO_JWKS_URL:}
+  s3:
+    bucket-name: ${S3_BUCKET_NAME:easybody-media}
+    presigned-url-expiration: 3600
+  sqs:
+    image-moderation-queue: ${SQS_IMAGE_QUEUE_URL:}
+  cloudwatch:
+    namespace: EasyBody
+
+# Application Configuration
+app:
+  search:
+    default-radius-km: 10
+    max-radius-km: 100
+  moderation:
+    auto-reject-threshold: 0.8
+    manual-review-threshold: 0.5
+  pagination:
+    default-page-size: 20
+    max-page-size: 100
+
+logging:
+  level:
+    root: INFO
+    com.easybody: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: ${SQL_LOG_LEVEL:INFO}
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.2.0'
+    id 'io.spring.dependency-management' version '1.1.4'
+}
+
+group = 'com.easybody'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    sourceCompatibility = '21'
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Spring Boot Starters
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    
+    // PostgreSQL & PostGIS
+    implementation 'org.postgresql:postgresql'
+    implementation 'org.hibernate:hibernate-spatial:6.3.1.Final'
+    
+    // AWS SDK
+    implementation 'software.amazon.awssdk:cognitoidentityprovider:2.21.0'
+    implementation 'software.amazon.awssdk:s3:2.21.0'
+    implementation 'software.amazon.awssdk:sqs:2.21.0'
+    implementation 'software.amazon.awssdk:cloudwatch:2.21.0'
+    implementation 'io.awspring.cloud:spring-cloud-aws-starter:3.0.3'
+    
+    // JWT
+    implementation 'com.nimbusds:nimbus-jose-jwt:9.37.3'
+    
+    // Lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    
+    // MapStruct for DTO mapping
+    implementation 'org.mapstruct:mapstruct:1.5.5.Final'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
+    
+    // X-Ray
+    implementation 'com.amazonaws:aws-xray-recorder-sdk-spring:2.15.0'
+    
+    // Test
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
