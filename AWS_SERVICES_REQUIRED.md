@@ -29,11 +29,48 @@ Có thể dùng Infrastructure as Code để tự động hóa setup
 
 ## 📋 Tổng Quan
 
+> **⚠️ LƯU Ý:** Trong giai đoạn development, bạn sẽ sử dụng **PostgreSQL local** trên máy thay vì AWS RDS.
+> 
+> Xem hướng dẫn chi tiết: **[LOCAL_DATABASE_SETUP.md](./LOCAL_DATABASE_SETUP.md)**
+
 Để hoàn thành và deploy hệ thống Easy Body Backend, bạn cần các dịch vụ AWS sau:
 
 ---
 
-## 1️⃣ AWS Cognito (Authentication) - **BẮT BUỘC**
+## 🎯 ROADMAP TRIỂN KHAI
+
+### **Phase 1: Development (Local) - HIỆN TẠI**
+✅ Sử dụng PostgreSQL local trên máy
+✅ Sử dụng file storage local (tạm thời)
+❌ Chưa cần AWS services
+
+**Chi phí: $0/month**
+
+### **Phase 2: MVP (Partial AWS)**
+Khi cần test với người dùng thật:
+- ✅ AWS Cognito (Authentication)
+- ✅ AWS S3 (Image storage)
+- ✅ PostgreSQL local (vẫn dùng local)
+
+**Chi phí: ~$2-5/month**
+
+### **Phase 3: Production (Full AWS)**
+Khi ra production:
+- ✅ AWS RDS PostgreSQL (Multi-AZ)
+- ✅ AWS Cognito
+- ✅ AWS S3 + CloudFront
+- ✅ AWS Lambda + SQS (Image moderation)
+- ✅ CloudWatch + Monitoring
+
+**Chi phí: ~$285/month**
+
+---
+
+## 1️⃣ AWS Cognito (Authentication) - **KHUYẾN NGHỊ CHO MVP**
+
+### Thời điểm cần thiết:
+✅ **Cần thiết khi:** Muốn test authentication với người dùng thật
+❌ **Không cần ngay:** Có thể dùng mock JWT token để dev
 
 ### Mục đích:
 - Quản lý đăng ký, đăng nhập người dùng
@@ -626,4 +663,3 @@ SERVER_PORT=8080
 - [ ] Create Lambda functions
 - [ ] Configure CloudWatch logs
 - [ ] Deploy backend application
-
