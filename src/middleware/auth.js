@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const { User } = require('../models');
+const { User, PTUser } = require('../models');
 
 // Verify JWT token (LOCAL - không cần AWS Cognito)
 const verifyToken = async (req, res, next) => {
@@ -20,8 +20,16 @@ const verifyToken = async (req, res, next) => {
     // Verify JWT token với secret key local
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // Tìm user trong database
-    const user = await User.findByPk(decoded.userId);
+    // Tìm user trong database và include PTUser profile nếu có
+    const user = await User.findByPk(decoded.userId, {
+      include: [
+        {
+          model: PTUser,
+          as: 'ptProfile',
+          required: false // Left join, không bắt buộc phải có PT profile
+        }
+      ]
+    });
 
     if (!user) {
       return res.status(401).json({

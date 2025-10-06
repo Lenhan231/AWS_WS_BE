@@ -13,7 +13,7 @@ exports.getAllPTs = async (req, res) => {
       limit: size,
       offset,
       include: [
-        { model: User, attributes: ['firstName', 'lastName', 'email', 'phoneNumber'] },
+        { model: User, as: 'user', attributes: ['firstName', 'lastName', 'email', 'phoneNumber'] },
         { model: Location, as: 'location' }
       ],
       where: { active: true },
@@ -123,7 +123,7 @@ exports.searchPTs = async (req, res) => {
       limit: size,
       offset,
       include: [
-        { model: User, attributes: ['firstName', 'lastName', 'email', 'phoneNumber'] },
+        { model: User, as: 'user', attributes: ['firstName', 'lastName', 'email', 'phoneNumber'] },
         { model: Location, as: 'location' }
       ],
       order: [['averageRating', 'DESC'], ['createdAt', 'DESC']]
@@ -154,7 +154,7 @@ exports.getPTById = async (req, res) => {
   try {
     const pt = await PTUser.findByPk(req.params.id, {
       include: [
-        { model: User, attributes: ['firstName', 'lastName', 'email', 'phoneNumber', 'profileImageUrl'] },
+        { model: User, as: 'user', attributes: ['firstName', 'lastName', 'email', 'phoneNumber', 'profileImageUrl'] },
         { model: Location, as: 'location' },
         { 
           model: Gym, 
@@ -325,7 +325,7 @@ exports.updatePT = async (req, res) => {
 
     const updatedPT = await PTUser.findByPk(pt.id, {
       include: [
-        { model: User, attributes: ['firstName', 'lastName', 'email'] },
+        { model: User, as: 'user', attributes: ['firstName', 'lastName', 'email'] },
         { model: Location, as: 'location' }
       ]
     });
@@ -368,4 +368,3 @@ exports.deletePT = async (req, res) => {
     });
   }
 };
-

@@ -193,7 +193,7 @@ exports.login = [
 // Get current logged-in user
 exports.getCurrentUser = async (req, res) => {
   try {
-    // req.user đã được set bởi verifyToken middleware
+    // req.user đã được set bởi verifyToken middleware (đã include ptProfile)
     const userResponse = {
       id: req.user.id,
       email: req.user.email,
@@ -204,6 +204,21 @@ exports.getCurrentUser = async (req, res) => {
       active: req.user.active,
       profileImageUrl: req.user.profileImageUrl
     };
+
+    // Nếu user có PT profile, thêm vào response
+    if (req.user.ptProfile) {
+      userResponse.ptProfile = {
+        id: req.user.ptProfile.id,
+        bio: req.user.ptProfile.bio,
+        specializations: req.user.ptProfile.specializations,
+        certifications: req.user.ptProfile.certifications,
+        experience: req.user.ptProfile.experience,
+        hourlyRate: req.user.ptProfile.hourlyRate,
+        availability: req.user.ptProfile.availability,
+        averageRating: req.user.ptProfile.averageRating,
+        ratingCount: req.user.ptProfile.ratingCount
+      };
+    }
 
     res.json(userResponse);
   } catch (error) {
@@ -322,4 +337,3 @@ exports.changePassword = [
     }
   }
 ];
-
