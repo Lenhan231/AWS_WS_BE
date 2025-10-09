@@ -1,3 +1,7 @@
+# SQL Server Auth Setup
+
+> 🏛️ Legacy Setup Guide – Node.js + SQL Server authentication stack. The current production backend runs on Spring Boot + PostgreSQL; see [`../backend/DATABASE_LOCAL_SETUP.md`](../backend/DATABASE_LOCAL_SETUP.md) for the active guide.
+
     password = "Password123"
     firstName = "John"
     lastName = "Doe"

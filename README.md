@@ -1,274 +1,258 @@
-# Easy Body - Backend REST API
+# 🧭 Easy Body – Full Stack Project Overview (v1.3)
 
-A comprehensive RESTful backend service for the **Easy Body** platform, built with Spring Boot 3, Java 21, and PostgreSQL with PostGIS.
+Next.js · Spring Boot 3 · Java 21 · PostgreSQL/PostGIS · AWS Cognito/S3/SQS
 
-## 🏋️ Overview
+> Một nền tảng kết nối **Gyms**, **Personal Trainers (PTs)** và **Clients**, giúp quảng bá gói tập, quản lý ưu đãi, đặt lịch và đánh giá trong cùng hệ thống.
 
-Easy Body is a web platform where:
-- **Gyms** can register and publish fitness offers
-- **Personal Trainers (PTs)** can create profiles and publish training packages
-- **Clients** can search, review, and contact gyms/PTs
-- **Admins** moderate content and manage reports
+---
 
-## 🛠️ Tech Stack
+## 📘 1. Architecture Snapshot
 
-- **Framework**: Spring Boot 3.2.0
-- **Language**: Java 21
-- **Database**: PostgreSQL with PostGIS extension
-- **Authentication**: AWS Cognito (JWT-based)
-- **Cloud Services**: 
-  - AWS S3 (Media storage with pre-signed URLs)
-  - AWS SQS (Image moderation queue)
-  - AWS CloudWatch (Logging)
-  - AWS X-Ray (Tracing)
-- **Build Tool**: Gradle
-- **Security**: Spring Security with JWT
-- **Validation**: Jakarta Validation (Bean Validation)
+```
+Frontend (Next.js)
+   ↓ API calls
+Backend (Spring Boot 3, Java 21)
+   ↳ PostgreSQL + PostGIS
+   ↳ AWS S3 (media)
+   ↳ AWS Cognito (JWT Auth)
+   ↳ AWS SQS (moderation queue)
+```
 
-## 📁 Project Structure
+| AWS Service | Purpose |
+|-------------|---------|
+| **EC2 / ECS** | Host Spring Boot JAR or container |
+| **RDS (PostgreSQL)** | Main database (PostGIS enabled) |
+| **S3** | Media uploads via presigned URLs + static frontend hosting |
+| **Cognito** | JWT authentication & user management |
+| **CloudWatch / X-Ray** | Logging, metrics, tracing |
+| **SQS** | Image moderation queue (phase 2) |
+| **Route 53 + CloudFront** | Custom domains & CDN |
+
+---
+
+## 🧱 2. Roles & Core Features
+
+| Role | Capabilities |
+|------|--------------|
+| **Admin** | Approve offers, review reports, manage subscription tiers |
+| **Gym Staff** | Register/manage gyms, assign PTs, publish gym offers |
+| **PT User** | Create PT profile, link to gyms, publish PT offers |
+| **Client User** | Discover gyms/PTs, bookmark, rate, report content |
+
+Frontend layout nổi bật: Home (card gallery), Gym Offers, PT Offers, Profile dashboards theo từng role (tham khảo `docs/frontend/FRONTEND_GUIDE.md`).
+
+---
+
+## 🗄️ 3. Database (PostgreSQL + PostGIS)
+
+- Bảng chính: `users`, `gyms`, `pt_users`, `gym_staff`, `offers`, `ratings`, `reports`, `locations`, `subscription_plans`, `gym_pt_associations`.
+- Flyway migrations điều khiển schema (`src/main/resources/db/migration`).
+- Extension cần thiết:
+  ```sql
+  CREATE EXTENSION IF NOT EXISTS postgis;
+  CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+  ```
+- Trigger cập nhật rating giữ đồng bộ `average_rating` và `rating_count` (xem `V2__offer_rating_trigger.sql`).
+- Tài liệu setup local: [`docs/backend/DATABASE_LOCAL_SETUP.md`](docs/backend/DATABASE_LOCAL_SETUP.md).
+
+**Geo-search sample**
+```sql
+SELECT id,
+       ST_Distance(location, ST_MakePoint(:lon,:lat)::geography)/1000 AS distance_km
+FROM gyms
+WHERE ST_DWithin(location, ST_MakePoint(:lon,:lat)::geography, :radiusKm * 1000)
+ORDER BY distance_km;
+```
+
+---
+
+## ⚙️ 4. Backend Setup
+
+```bash
+./gradlew build
+docker compose up -d db
+./gradlew bootRun
+```
+
+**Dockerfile (multi-stage)**
+```dockerfile
+FROM gradle:8.5-jdk21-alpine AS builder
+WORKDIR /app
+COPY . .
+RUN ./gradlew bootJar --no-daemon
+
+FROM eclipse-temurin:21-jre-alpine
+WORKDIR /app
+COPY --from=builder /app/build/libs/*.jar app.jar
+ENTRYPOINT ["java","-jar","app.jar"]
+```
+
+**docker-compose.yml excerpt**
+```yaml
+services:
+  app:
+    build: .
+    ports: ["8080:8080"]
+    depends_on: [db]
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+      DB_HOST: db
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+
+  db:
+    image: postgis/postgis:15-3.4-alpine
+    environment:
+      POSTGRES_DB: easybody
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports: ["5432:5432"]
+```
+
+`.env.example` chứa tất cả biến cần thiết (DB, AWS toggles, port publish).
+
+---
+
+## 🔐 5. Authentication (AWS Cognito)
+
+```
+Frontend → Cognito Hosted UI / Amplify → JWT → Spring Boot (`/api/v1/auth/register`, `/api/v1/auth/me`)
+```
+
+- Roles hỗ trợ: `ADMIN`, `GYM_STAFF`, `PT_USER`, `CLIENT_USER`.
+- Spring Security cấu hình public endpoints (`/api/v1/search/**`, `/swagger-ui/**`, `/v3/api-docs/**`) và role-based guard cho admin/PT/gym flows.
+- Swagger UI đã bật `bearerAuth`:
+  ```java
+  @SecurityScheme(
+      name = "bearerAuth",
+      type = SecuritySchemeType.HTTP,
+      scheme = "bearer",
+      bearerFormat = "JWT"
+  )
+  ```
+- Legacy auth (Node.js + SQL Server) lưu tại [`docs/legacy/QUICK_START_AUTH.md`](docs/legacy/QUICK_START_AUTH.md).
+
+---
+
+## 🌐 6. API Overview
+
+| Module | Endpoint highlights |
+|--------|---------------------|
+| **Auth** | `/api/v1/auth/register`, `/api/v1/auth/me` |
+| **Gyms** | `/api/v1/gyms`, `/api/v1/gyms/search`, `/api/v1/gyms/{id}` |
+| **PT Users** | `/api/v1/pt-users`, `/api/v1/pt-users/{id}` |
+| **Offers** | `/api/v1/offers`, `/api/v1/search/offers`, `/api/v1/offers/{id}` |
+| **Ratings** | `/api/v1/ratings`, `/api/v1/ratings/offer/{offerId}` |
+| **Reports** | `/api/v1/reports` |
+| **Admin** | `/api/v1/admin/offers/*`, `/api/v1/admin/reports/*` |
+| **Media** | `/api/v1/media/presigned-url` |
+
+**Chi tiết:**
+- Full catalogue & samples: [`docs/api/API_DOCUMENTATION.md`](docs/api/API_DOCUMENTATION.md)
+- Geo-search deep dive: [`docs/api/API_NEARBY_SEARCH.md`](docs/api/API_NEARBY_SEARCH.md)
+- Frontend call patterns: [`docs/api/FRONTEND_API_INTEGRATION.md`](docs/api/FRONTEND_API_INTEGRATION.md)
+- Swagger JSON: `http://localhost:8080/v3/api-docs`
+
+---
+
+## 💻 7. Frontend Integration (Next.js 14)
+
+- Base URL: `process.env.NEXT_PUBLIC_API_BASE_URL`
+- Auth: Cognito SDK / Amplify (store access & refresh tokens in `localStorage`).
+- Image upload: request presigned URL → `PUT` lên S3 → gửi metadata lại backend.
+- Geo search: `POST /api/v1/search/offers` hoặc `GET /api/v1/search/nearby` với lat/lon/radius.
+- Tham khảo chi tiết trong [`docs/frontend/FRONTEND_GUIDE.md`](docs/frontend/FRONTEND_GUIDE.md).
+
+---
+
+## 🧰 8. Tooling & Developer Workflow
+
+| Tool | Purpose |
+|------|---------|
+| **Swagger UI / Springdoc** | API explorer (`/swagger-ui.html`) |
+| **Postman / curl** | Manual testing (samples trong docs) |
+| **Flyway** | Schema migrations & seeding |
+| **Docker Compose** | Local stack orchestration |
+| **pgAdmin / DBeaver** | DB inspection |
+| **CloudWatch / X-Ray** | Logs & tracing trên AWS |
+| **Gradle Wrapper** | Build portability (`./gradlew`) |
+
+---
+
+## ☁️ 9. Deployment Playbook (AWS)
+
+1. **Provision**: VPC (public/private subnets), RDS Postgres (PostGIS), S3 buckets (frontend + media), Cognito User Pool, SQS queue, CloudWatch dashboards, Route 53 records.
+2. **Build artifact**: `./gradlew bootJar` → `build/libs/easybody-*.jar`.
+3. **Deploy backend** (EC2/ECS/Beanstalk):
+   ```bash
+   SPRING_PROFILES_ACTIVE=aws \
+   DB_HOST=<rds-endpoint> \
+   DB_USERNAME=postgres \
+   DB_PASSWORD=... \
+   AWS_REGION=us-east-1 \
+   java -jar easybody.jar
+   ```
+4. **Frontend**: `next build && npx next export` → upload `/out` lên S3 → invalidate CloudFront.
+5. **DNS**: Route 53 map `api.easybody.dev` (API) và `www.easybody.dev` (frontend) tới ALB/CloudFront.
+6. **Flyway**: chạy migrations khi deploy (`./gradlew flywayMigrate`).
+
+Chi tiết từng bước: [`docs/aws/AWS_SERVICES_REQUIRED.md`](docs/aws/AWS_SERVICES_REQUIRED.md) & [`docs/aws/AWS_DEPLOY_GUIDE.md`](docs/aws/AWS_DEPLOY_GUIDE.md).
+
+---
+
+## 🧱 10. Project Structure
 
 ```
 src/main/java/com/easybody/
-├── config/                 # Configuration classes
-│   ├── AwsConfig.java
-│   ├── SecurityConfig.java
-│   └── JwtAuthenticationFilter.java
-├── controller/            # REST Controllers
-│   ├── AuthController.java
-│   ├── GymController.java
-│   ├── PTUserController.java
-│   ├── OfferController.java
-│   ├── SearchController.java
-│   ├── RatingController.java
-│   ├── ReportController.java
-│   ├── AdminController.java
-│   └── MediaController.java
-├── service/               # Business Logic Layer
-│   ├── UserService.java
-│   ├── GymService.java
-│   ├── PTUserService.java
-│   ├── OfferService.java
-│   ├── RatingService.java
-│   ├── ReportService.java
-│   ├── GymPTAssociationService.java
-│   └── S3Service.java
-├── repository/            # JPA Repositories
-│   ├── UserRepository.java
-│   ├── GymRepository.java
-│   ├── PTUserRepository.java
-│   ├── OfferRepository.java
-│   ├── RatingRepository.java
-│   ├── ReportRepository.java
-│   └── ...
-├── model/                 # Domain Models
-│   ├── entity/           # JPA Entities
-│   └── enums/            # Enumerations
-├── dto/                   # Data Transfer Objects
-│   ├── request/          # Request DTOs
-│   └── response/         # Response DTOs
-├── exception/            # Custom Exceptions & Handler
-│   ├── ResourceNotFoundException.java
-│   ├── UnauthorizedException.java
-│   └── GlobalExceptionHandler.java
-└── EasyBodyApplication.java
+├── config/
+├── controller/
+├── service/
+├── repository/
+├── model/
+├── dto/
+└── exception/
+
+docs/
+├── PROJECT_OVERVIEW.md        ← Hub tổng hợp
+├── api/
+├── backend/
+├── aws/
+├── frontend/
+└── legacy/
 ```
 
-## 🗃️ Database Schema
+---
 
-### Core Entities
-- **User** - Base user entity with role (Admin, Gym_Staff, PT_User, Client_User)
-- **Gym** - Gym profiles with location
-- **PTUser** - Personal trainer profiles with specializations
-- **GymStaff** - Staff members associated with gyms
-- **GymPTAssociation** - Many-to-many relationship with approval workflow
-- **ClientUser** - Client profiles with fitness goals
-- **Location** - PostGIS-enabled location data (lat/lon + geometry)
-- **Offer** - Gym or PT offers with pricing and status
-- **Rating** - Client ratings for offers (1-5 stars)
-- **Report** - User-submitted reports for moderation
+## 🧭 11. Roadmap Highlights
 
-## 🚀 API Endpoints
+| Track | Status |
+|-------|--------|
+| RESTful API coverage | ✅ Complete |
+| PostGIS nearby search | ✅ Complete |
+| JWT security (Cognito) | ✅ Integrated |
+| Flyway migrations | ✅ In place |
+| AWS infra readiness | ⚙️ Ready (consumer pending) |
+| SQS moderation consumer | ⏳ Planned |
+| CI/CD automation | ⏳ Planned |
+| Security hardening (rate limit, WAF, Redis) | ⏳ Planned |
 
-### Authentication
-- `POST /api/v1/auth/register` - Register new user
-- `GET /api/v1/auth/me` - Get current user profile
+Detailed backlog: [`docs/backend/BACKEND_PLAN.md`](docs/backend/BACKEND_PLAN.md).
 
-### Gym Management
-- `POST /api/v1/gyms` - Register a gym
-- `PUT /api/v1/gyms/{id}` - Update gym
-- `GET /api/v1/gyms/{id}` - Get gym details
-- `GET /api/v1/gyms/search` - Search gyms (text or geo-location)
-- `POST /api/v1/gyms/{id}/assign-pt` - Assign PT to gym
-- `PUT /api/v1/gyms/pt-associations/{id}/approve` - Approve PT assignment
+---
 
-### PT Management
-- `POST /api/v1/pt-users` - Create PT profile
-- `PUT /api/v1/pt-users/{id}` - Update PT profile
-- `GET /api/v1/pt-users/{id}` - Get PT details
-- `GET /api/v1/pt-users` - List PTs (with geo-location filter)
+## 🪦 Legacy References (Archive)
 
-### Offer Management
-- `POST /api/v1/offers` - Create offer
-- `PUT /api/v1/offers/{id}` - Update offer
-- `GET /api/v1/offers/{id}` - Get offer details
+- [`docs/legacy/BaseIdea/BASE_IDEA_SUMMARY.md`](docs/legacy/BaseIdea/BASE_IDEA_SUMMARY.md) – Ý tưởng & sơ đồ ban đầu.
+- [`docs/legacy/PROJECT_SUMMARY.md`](docs/legacy/PROJECT_SUMMARY.md) – Ghi chú migration thời gian đầu.
+- [`docs/legacy/SQL_SERVER_AUTH_SETUP.md`](docs/legacy/SQL_SERVER_AUTH_SETUP.md) – Node.js + SQL Server auth stack.
+- [`docs/legacy/QUICK_START_AUTH.md`](docs/legacy/QUICK_START_AUTH.md) – Quick test đăng ký/đăng nhập cũ.
 
-### Search
-- `POST /api/v1/search/offers` - Advanced offer search
-- `GET /api/v1/search/offers` - Search with query parameters
-  - Filters: location radius, price range, rating, offer type, text search
+Các tài liệu này chỉ dùng đối chiếu lịch sử; production hiện tại dựa trên Spring Boot + PostgreSQL.
 
-### Ratings
-- `POST /api/v1/ratings` - Create rating (clients only)
-- `GET /api/v1/ratings/offer/{offerId}` - Get offer ratings
+---
 
-### Reports
-- `POST /api/v1/reports` - Submit report
+## 🧾 License
 
-### Admin Moderation
-- `GET /api/v1/admin/offers/pending` - Get pending offers
-- `PUT /api/v1/admin/offers/{id}/moderate` - Approve/reject offer
-- `GET /api/v1/admin/reports/pending` - Get pending reports
-- `PUT /api/v1/admin/reports/{id}/resolve` - Resolve report
-- `PUT /api/v1/admin/reports/{id}/dismiss` - Dismiss report
+Proprietary © EasyBody Team 2025  
+*For FCJ Bootcamp & internal demonstration use.*
 
-### Media Upload
-- `GET /api/v1/media/presigned-url` - Generate S3 pre-signed upload URL
-
-## ⚙️ Configuration
-
-Spring profiles:
-- `local` (default) — targets a local PostgreSQL instance for development.
-- `aws` — swap in AWS RDS/AWS service credentials when deploying.
-
-Set environment variables (e.g. `.env`, shell exports, or Docker Compose overrides):
-
-```yaml
-# Local Database
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=easybody
-DB_USERNAME=postgres
-DB_PASSWORD=yourpassword
-
-# AWS (optional until deployment)
-AWS_REGION=us-east-1
-COGNITO_USER_POOL_ID=your-pool-id
-COGNITO_CLIENT_ID=your-client-id
-COGNITO_JWKS_URL=https://cognito-idp.{region}.amazonaws.com/{userPoolId}/.well-known/jwks.json
-S3_BUCKET_NAME=easybody-media
-SQS_IMAGE_QUEUE_URL=https://sqs.{region}.amazonaws.com/{account}/image-moderation
-
-# Optional
-SHOW_SQL=true
-SQL_LOG_LEVEL=DEBUG
-```
-
-## 🏃 Running the Application
-
-### Prerequisites
-- Java 21
-- PostgreSQL 14+ with PostGIS extension (can run via Docker Compose)
-- AWS Account & credentials **only when enabling the `aws` profile**
-
-### Setup Database
-
-```sql
-CREATE DATABASE easybody;
-\c easybody
-CREATE EXTENSION postgis;
-```
-
-### Build and Run
-
-```bash
-# Option 1: run database with Docker Compose
-docker compose up -d db
-
-# Build
-./gradlew build
-
-# Run
-./gradlew bootRun           # uses local profile by default
-
-# Or run with explicit profile
-# SPRING_PROFILES_ACTIVE=aws ./gradlew bootRun
-
-# Or run JAR
-java -jar build/libs/easybody-0.0.1-SNAPSHOT.jar
-```
-
-The application will start on `http://localhost:8080`
-
-## 🔐 Authentication
-
-All requests (except public endpoints) require a JWT token from AWS Cognito:
-
-```
-Authorization: Bearer <JWT_TOKEN>
-```
-
-The JWT should contain:
-- `sub` - Cognito user ID
-- `custom:role` - User role (ADMIN, GYM_STAFF, PT_USER, CLIENT_USER)
-
-## 🌍 Geo-Location Features
-
-The application uses PostGIS for geo-spatial queries:
-
-- **Radius Search**: Find gyms/PTs/offers within X km of a location
-- **Distance Calculation**: Calculate distances between points
-- **Spatial Indexing**: Optimized geo-queries with spatial indexes
-
-Example search:
-```
-GET /api/v1/search/offers?latitude=40.7128&longitude=-74.0060&radiusKm=5
-```
-
-## 📝 Business Logic
-
-### Offer Workflow
-1. Gym/PT creates offer → Status: `PENDING`
-2. Images sent to SQS for moderation (TODO)
-3. Admin reviews → Status: `APPROVED` or `REJECTED`
-4. Approved offers appear in public search
-
-### PT-Gym Association
-1. Gym assigns PT → Status: `PENDING`
-2. Gym staff/admin approves → Status: `APPROVED`
-3. PT can create offers for that gym
-
-### Rating System
-- Clients rate offers (1-5 stars)
-- Average rating auto-calculated on each new rating
-- Ratings influence search ranking
-
-### Report System
-- Users report inappropriate content/users
-- Admin reviews and resolves/dismisses reports
-- Tracks report history and moderation decisions
-
-## 🧭 Migration Notes
-
-- A legacy Node.js/Express implementation is archived under `legacy-node/`. It is no longer part of the active build but can be referenced during the Spring Boot migration.
-- Docker assets (`Dockerfile`, `docker-compose.yml`) target the Spring Boot service and a PostGIS-enabled PostgreSQL database.
-
-## 🔜 TODO / Future Enhancements
-
-- [ ] Implement SQS queue consumer for image moderation
-- [ ] Integrate AWS SageMaker for content moderation
-- [ ] Add OpenSearch for advanced text search
-- [ ] Implement email notifications (SES)
-- [ ] Add pagination improvements
-- [ ] Create comprehensive unit tests
-- [ ] Add API documentation (Swagger/OpenAPI)
-- [ ] Implement rate limiting
-- [ ] Add caching layer (Redis)
-- [ ] Create CI/CD pipeline
-
-## 📄 License
-
-Proprietary - All rights reserved
-
-## 👥 Contact
-
-For questions or support, contact the development team.

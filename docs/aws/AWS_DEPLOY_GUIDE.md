@@ -1,3 +1,7 @@
+# AWS Deployment Guide
+
+_Companion document: [`AWS_SERVICES_REQUIRED.md`](./AWS_SERVICES_REQUIRED.md) for high-level architecture checklist._
+
    Folder name: offers/
    ```
 4. Click **Create folder** cho mỗi folder
@@ -1099,5 +1103,3 @@ AWS Region: us-east-1 (hoặc region gần user nhất)
 3. Tạo 3 folders:
    ```
    Folder name: profiles/
-   Folder name: gyms/
-

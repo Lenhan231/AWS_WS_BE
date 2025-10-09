@@ -1,3 +1,9 @@
+# Frontend Guide
+
+Overview of the Next.js client structure and integration tips for the EasyBody platform.
+
+> Companion API calls guide: [`../api/FRONTEND_API_INTEGRATION.md`](../api/FRONTEND_API_INTEGRATION.md)
+
       })
     });
     
@@ -945,4 +951,3 @@ const uploadImageToS3 = async (file) => {
       body: JSON.stringify({
         fileName: file.name,
         fileType: file.type
-

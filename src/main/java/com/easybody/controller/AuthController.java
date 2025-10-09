@@ -3,6 +3,8 @@ package com.easybody.controller;
 import com.easybody.dto.request.UserRegistrationRequest;
 import com.easybody.dto.response.UserResponse;
 import com.easybody.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +31,8 @@ public class AuthController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+    @Operation(summary = "Get profile of the currently authenticated user")
+    @SecurityRequirement(name = "bearerAuth")
     @GetMapping("/me")
     public ResponseEntity<UserResponse> getCurrentUser(Authentication authentication) {
         String cognitoSub = authentication.getName();
@@ -36,4 +40,3 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 }
-

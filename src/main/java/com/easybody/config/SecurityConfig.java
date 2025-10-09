@@ -32,6 +32,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/pt-users/{id}").permitAll()
                         .requestMatchers("/api/v1/offers/{id}").permitAll()
                         .requestMatchers("/api/v1/ratings/offer/{offerId}").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/actuator/health").permitAll()
 
                         // Admin only endpoints
                         .requestMatchers("/api/v1/admin/**").hasAuthority("ADMIN")
@@ -44,4 +45,3 @@ public class SecurityConfig {
         return http.build();
     }
 }
-

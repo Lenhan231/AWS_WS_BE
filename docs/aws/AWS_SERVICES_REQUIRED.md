@@ -1,3 +1,7 @@
+# AWS Services Required
+
+Checklist of services and configuration pillars needed before deploying the EasyBody backend.
+
 - [ ] Setup Route 53 domain
 - [ ] Configure SSL certificate (ACM)
 - [ ] Test all endpoints
@@ -31,7 +35,7 @@ Có thể dùng Infrastructure as Code để tự động hóa setup
 
 > **⚠️ LƯU Ý:** Trong giai đoạn development, bạn sẽ sử dụng **PostgreSQL local** trên máy thay vì AWS RDS.
 > 
-> Xem hướng dẫn chi tiết: **[LOCAL_DATABASE_SETUP.md](./LOCAL_DATABASE_SETUP.md)**
+> Xem hướng dẫn chi tiết: **[DATABASE_LOCAL_SETUP.md](../backend/DATABASE_LOCAL_SETUP.md)**
 
 Để hoàn thành và deploy hệ thống Easy Body Backend, bạn cần các dịch vụ AWS sau:
 

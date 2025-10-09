@@ -22,30 +22,41 @@ repositories {
 }
 
 dependencies {
+    // Spring Boot starters
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
-    implementation 'org.postgresql:postgresql'
+    // API documentation
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
+
+    // Database layer
     implementation 'org.hibernate:hibernate-spatial:6.3.1.Final'
+    runtimeOnly 'org.postgresql:postgresql'
 
+    // Schema migrations
+    implementation 'org.flywaydb:flyway-core'
+    implementation 'org.flywaydb:flyway-database-postgresql'
+
+    // AWS integrations
     implementation 'software.amazon.awssdk:cognitoidentityprovider:2.21.0'
     implementation 'software.amazon.awssdk:s3:2.21.0'
     implementation 'software.amazon.awssdk:sqs:2.21.0'
     implementation 'software.amazon.awssdk:cloudwatch:2.21.0'
     implementation 'io.awspring.cloud:spring-cloud-aws-starter:3.0.3'
+    implementation 'com.amazonaws:aws-xray-recorder-sdk-spring:2.15.0'
 
+    // Security / JWT utilities
     implementation 'com.nimbusds:nimbus-jose-jwt:9.37.3'
 
+    // Mapping & code generation
+    implementation 'org.mapstruct:mapstruct:1.5.5.Final'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
-    implementation 'org.mapstruct:mapstruct:1.5.5.Final'
-    annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
-
-    implementation 'com.amazonaws:aws-xray-recorder-sdk-spring:2.15.0'
-
+    // Testing
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
 }

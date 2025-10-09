@@ -1,38 +1,51 @@
+version: '3.9'
+
 services:
+  db:
+    image: postgis/postgis:15-3.4-alpine
+    container_name: easybody-db
+    environment:
+      POSTGRES_DB: ${DB_NAME:-easybody}
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ./docker/initdb:/docker-entrypoint-initdb.d:ro
+    networks:
+      - easybody-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-postgres} -d ${DB_NAME:-easybody}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   app:
     build:
       context: .
       dockerfile: Dockerfile
     image: easybody-backend
+    container_name: easybody-app
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     environment:
-      SPRING_PROFILES_ACTIVE: prod
-      DB_HOST: db
-      DB_PORT: "5432"
-      DB_NAME: easybody
-      DB_USERNAME: postgres
-      DB_PASSWORD: postgres
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
+      DB_HOST: ${DB_HOST:-db}
+      DB_PORT: ${DB_PORT:-5432}
+      DB_NAME: ${DB_NAME:-easybody}
+      DB_USERNAME: ${DB_USERNAME:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
     ports:
-      - "8080:8080"
+      - "${APP_PORT:-8080}:8080"
     networks:
-      - backend
-
-  db:
-    image: postgis/postgis:15-3.4-alpine
-    environment:
-      POSTGRES_DB: easybody
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    ports:
-      - "5432:5432"
-    volumes:
-      - db-data:/var/lib/postgresql/data
-    networks:
-      - backend
+      - easybody-net
+    restart: unless-stopped
 
 volumes:
   db-data:
 
 networks:
-  backend:
+  easybody-net:

@@ -43,6 +43,10 @@ spring:
   config:
     activate:
       on-profile: local
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
   datasource:
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:easybody}
     username: ${DB_USERNAME:postgres}
@@ -50,7 +54,7 @@ spring:
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
@@ -69,6 +73,10 @@ spring:
   config:
     activate:
       on-profile: aws
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
   datasource:
     url: jdbc:postgresql://${DB_HOST:your-rds-endpoint.amazonaws.com}:${DB_PORT:5432}/${DB_NAME:easybody}
     username: ${DB_USERNAME:postgres}
