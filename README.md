@@ -136,17 +136,21 @@ src/main/java/com/easybody/
 
 ## ⚙️ Configuration
 
-Create `src/main/resources/application.yml` or set environment variables:
+Spring profiles:
+- `local` (default) — targets a local PostgreSQL instance for development.
+- `aws` — swap in AWS RDS/AWS service credentials when deploying.
+
+Set environment variables (e.g. `.env`, shell exports, or Docker Compose overrides):
 
 ```yaml
-# Database
+# Local Database
 DB_HOST=localhost
 DB_PORT=5432
 DB_NAME=easybody
 DB_USERNAME=postgres
 DB_PASSWORD=yourpassword
 
-# AWS
+# AWS (optional until deployment)
 AWS_REGION=us-east-1
 COGNITO_USER_POOL_ID=your-pool-id
 COGNITO_CLIENT_ID=your-client-id
@@ -163,8 +167,8 @@ SQL_LOG_LEVEL=DEBUG
 
 ### Prerequisites
 - Java 21
-- PostgreSQL 14+ with PostGIS extension
-- AWS Account (for Cognito, S3, SQS)
+- PostgreSQL 14+ with PostGIS extension (can run via Docker Compose)
+- AWS Account & credentials **only when enabling the `aws` profile**
 
 ### Setup Database
 
@@ -177,11 +181,17 @@ CREATE EXTENSION postgis;
 ### Build and Run
 
 ```bash
+# Option 1: run database with Docker Compose
+docker compose up -d db
+
 # Build
 ./gradlew build
 
 # Run
-./gradlew bootRun
+./gradlew bootRun           # uses local profile by default
+
+# Or run with explicit profile
+# SPRING_PROFILES_ACTIVE=aws ./gradlew bootRun
 
 # Or run JAR
 java -jar build/libs/easybody-0.0.1-SNAPSHOT.jar
@@ -237,6 +247,11 @@ GET /api/v1/search/offers?latitude=40.7128&longitude=-74.0060&radiusKm=5
 - Admin reviews and resolves/dismisses reports
 - Tracks report history and moderation decisions
 
+## 🧭 Migration Notes
+
+- A legacy Node.js/Express implementation is archived under `legacy-node/`. It is no longer part of the active build but can be referenced during the Spring Boot migration.
+- Docker assets (`Dockerfile`, `docker-compose.yml`) target the Spring Boot service and a PostGIS-enabled PostgreSQL database.
+
 ## 🔜 TODO / Future Enhancements
 
 - [ ] Implement SQS queue consumer for image moderation
@@ -257,4 +272,3 @@ Proprietary - All rights reserved
 ## 👥 Contact
 
 For questions or support, contact the development team.
-

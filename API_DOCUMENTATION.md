@@ -10,73 +10,75 @@ Authorization: Bearer <JWT_TOKEN>
 
 ## 📋 API Endpoints Summary
 
+The tables below reflect the endpoints implemented in the Spring Boot codebase under `src/main/java/com/easybody/controller`.
+
 ### 🔐 Authentication Module
-| Method | Endpoint | Auth | Role | Description |
-|--------|----------|------|------|-------------|
-| POST | `/api/v1/auth/register` | ✅ | Any | Register user after Cognito signup |
-| GET | `/api/v1/auth/me` | ✅ | Any | Get current user profile |
+| Method | Endpoint | Auth | Role | Status | Description |
+|--------|----------|------|------|--------|-------------|
+| POST | `/api/v1/auth/register` | ✅ | Any | ✅ Spring Boot | Register user based on Cognito identity |
+| GET | `/api/v1/auth/me` | ✅ | Any | ✅ Spring Boot | Get current user profile |
 
 ### 🏢 Gym Management
-| Method | Endpoint | Auth | Role | Description |
-|--------|----------|------|------|-------------|
-| POST | `/api/v1/gyms` | ✅ | GYM_STAFF, ADMIN | Register new gym |
-| PUT | `/api/v1/gyms/{gymId}` | ✅ | GYM_STAFF, ADMIN | Update gym details |
-| GET | `/api/v1/gyms/{gymId}` | ❌ | Public | Get gym by ID |
-| GET | `/api/v1/gyms` | ❌ | Public | List all active gyms |
-| GET | `/api/v1/gyms/search` | ❌ | Public | Search gyms by text or location |
-| POST | `/api/v1/gyms/{gymId}/assign-pt` | ✅ | GYM_STAFF, ADMIN | Assign PT to gym |
-| GET | `/api/v1/gyms/{gymId}/pt-associations` | ❌ | Public | Get gym's PT associations |
-| PUT | `/api/v1/gyms/pt-associations/{id}/approve` | ✅ | GYM_STAFF, ADMIN | Approve PT-Gym association |
-| PUT | `/api/v1/gyms/pt-associations/{id}/reject` | ✅ | GYM_STAFF, ADMIN | Reject PT-Gym association |
+| Method | Endpoint | Auth | Role | Status | Description |
+|--------|----------|------|------|--------|-------------|
+| POST | `/api/v1/gyms` | ✅ | GYM_STAFF, ADMIN | ✅ Spring Boot | Register new gym |
+| PUT | `/api/v1/gyms/{gymId}` | ✅ | GYM_STAFF, ADMIN | ✅ Spring Boot | Update gym details |
+| GET | `/api/v1/gyms/{gymId}` | ❌ | Public | ✅ Spring Boot | Get gym by ID |
+| GET | `/api/v1/gyms` | ❌ | Public | ✅ Spring Boot | List all active gyms |
+| GET | `/api/v1/gyms/search` | ❌ | Public | ✅ Spring Boot | Search gyms by text or nearby radius |
+| POST | `/api/v1/gyms/{gymId}/assign-pt` | ✅ | GYM_STAFF, ADMIN | ✅ Spring Boot | Assign PT to gym (`ptUserId` query param) |
+| GET | `/api/v1/gyms/{gymId}/pt-associations` | ❌ | Public | ✅ Spring Boot | Get gym/PT associations |
+| PUT | `/api/v1/gyms/pt-associations/{id}/approve` | ✅ | GYM_STAFF, ADMIN | ✅ Spring Boot | Approve PT-Gym association |
+| PUT | `/api/v1/gyms/pt-associations/{id}/reject` | ✅ | GYM_STAFF, ADMIN | ✅ Spring Boot | Reject association (`reason` query param) |
 
 ### 💪 Personal Trainer Management
-| Method | Endpoint | Auth | Role | Description |
-|--------|----------|------|------|-------------|
-| POST | `/api/v1/pt-users` | ✅ | PT_USER | Create PT profile |
-| PUT | `/api/v1/pt-users/{ptUserId}` | ✅ | PT_USER, ADMIN | Update PT profile |
-| GET | `/api/v1/pt-users/{ptUserId}` | ❌ | Public | Get PT details |
-| GET | `/api/v1/pt-users` | ❌ | Public | List PTs (with location filter) |
-| GET | `/api/v1/pt-users/{ptUserId}/gym-associations` | ❌ | Public | Get PT's gym associations |
+| Method | Endpoint | Auth | Role | Status | Description |
+|--------|----------|------|------|--------|-------------|
+| POST | `/api/v1/pt-users` | ✅ | PT_USER | ✅ Spring Boot | Create PT profile |
+| PUT | `/api/v1/pt-users/{ptUserId}` | ✅ | PT_USER, ADMIN | ✅ Spring Boot | Update PT profile |
+| GET | `/api/v1/pt-users/{ptUserId}` | ❌ | Public | ✅ Spring Boot | Get PT details |
+| GET | `/api/v1/pt-users` | ❌ | Public | ✅ Spring Boot | List PTs (supports geo filters) |
+| GET | `/api/v1/pt-users/{ptUserId}/gym-associations` | ❌ | Public | ✅ Spring Boot | Get PT's gym associations |
 
 ### 🎯 Offer Management
-| Method | Endpoint | Auth | Role | Description |
-|--------|----------|------|------|-------------|
-| POST | `/api/v1/offers` | ✅ | GYM_STAFF, PT_USER, ADMIN | Create new offer |
-| PUT | `/api/v1/offers/{offerId}` | ✅ | GYM_STAFF, PT_USER, ADMIN | Update offer |
-| GET | `/api/v1/offers/{offerId}` | ❌ | Public | Get offer by ID |
+| Method | Endpoint | Auth | Role | Status | Description |
+|--------|----------|------|------|--------|-------------|
+| POST | `/api/v1/offers` | ✅ | GYM_STAFF, PT_USER, ADMIN | ✅ Spring Boot | Create new offer |
+| PUT | `/api/v1/offers/{offerId}` | ✅ | GYM_STAFF, PT_USER, ADMIN | ✅ Spring Boot | Update offer |
+| GET | `/api/v1/offers/{offerId}` | ❌ | Public | ✅ Spring Boot | Get offer by ID |
 
 ### 🔍 Search Module
-| Method | Endpoint | Auth | Role | Description |
-|--------|----------|------|------|-------------|
-| POST | `/api/v1/search/offers` | ❌ | Public | Advanced offer search (JSON body) |
-| GET | `/api/v1/search/offers` | ❌ | Public | Search offers (query params) |
+| Method | Endpoint | Auth | Role | Status | Description |
+|--------|----------|------|------|--------|-------------|
+| POST | `/api/v1/search/offers` | ❌ | Public | ✅ Spring Boot | Advanced offer search (JSON body) |
+| GET | `/api/v1/search/offers` | ❌ | Public | ✅ Spring Boot | Search offers via query parameters |
 
 ### ⭐ Rating System
-| Method | Endpoint | Auth | Role | Description |
-|--------|----------|------|------|-------------|
-| POST | `/api/v1/ratings` | ✅ | CLIENT_USER | Submit rating for offer |
-| GET | `/api/v1/ratings/offer/{offerId}` | ❌ | Public | Get ratings for offer (paginated) |
+| Method | Endpoint | Auth | Role | Status | Description |
+|--------|----------|------|------|--------|-------------|
+| POST | `/api/v1/ratings` | ✅ | CLIENT_USER | ✅ Spring Boot | Submit rating for offer |
+| GET | `/api/v1/ratings/offer/{offerId}` | ❌ | Public | ✅ Spring Boot | Get ratings for offer (paginated) |
 
 ### 🚩 Report System
-| Method | Endpoint | Auth | Role | Description |
-|--------|----------|------|------|-------------|
-| POST | `/api/v1/reports` | ✅ | Any | Submit report (offer or user) |
+| Method | Endpoint | Auth | Role | Status | Description |
+|--------|----------|------|------|--------|-------------|
+| POST | `/api/v1/reports` | ✅ | Any | ✅ Spring Boot | Submit report (offer or user) |
 
 ### 👨‍💼 Admin Moderation
-| Method | Endpoint | Auth | Role | Description |
-|--------|----------|------|------|-------------|
-| GET | `/api/v1/admin/offers/pending` | ✅ | ADMIN | Get pending offers |
-| PUT | `/api/v1/admin/offers/{offerId}/moderate` | ✅ | ADMIN | Approve/reject offer |
-| GET | `/api/v1/admin/reports/pending` | ✅ | ADMIN | Get pending reports |
-| GET | `/api/v1/admin/reports` | ✅ | ADMIN | Get reports by status |
-| PUT | `/api/v1/admin/reports/{reportId}/resolve` | ✅ | ADMIN | Resolve report |
-| PUT | `/api/v1/admin/reports/{reportId}/dismiss` | ✅ | ADMIN | Dismiss report |
-| GET | `/api/v1/admin/pt-associations/pending` | ✅ | ADMIN | Get pending PT-Gym associations |
+| Method | Endpoint | Auth | Role | Status | Description |
+|--------|----------|------|------|--------|-------------|
+| GET | `/api/v1/admin/offers/pending` | ✅ | ADMIN | ✅ Spring Boot | Get pending offers |
+| PUT | `/api/v1/admin/offers/{offerId}/moderate` | ✅ | ADMIN | ✅ Spring Boot | Approve or reject offer |
+| GET | `/api/v1/admin/reports/pending` | ✅ | ADMIN | ✅ Spring Boot | Get pending reports |
+| GET | `/api/v1/admin/reports` | ✅ | ADMIN | ✅ Spring Boot | Get reports filtered by status |
+| PUT | `/api/v1/admin/reports/{reportId}/resolve` | ✅ | ADMIN | ✅ Spring Boot | Resolve report |
+| PUT | `/api/v1/admin/reports/{reportId}/dismiss` | ✅ | ADMIN | ✅ Spring Boot | Dismiss report |
+| GET | `/api/v1/admin/pt-associations/pending` | ✅ | ADMIN | ✅ Spring Boot | Pending PT-Gym associations |
 
 ### 📸 Media Upload
-| Method | Endpoint | Auth | Role | Description |
-|--------|----------|------|------|-------------|
-| GET | `/api/v1/media/presigned-url` | ✅ | Any | Get S3 pre-signed upload URL |
+| Method | Endpoint | Auth | Role | Status | Description |
+|--------|----------|------|------|--------|-------------|
+| GET | `/api/v1/media/presigned-url` | ✅ | Any | ✅ Spring Boot | Generate S3 pre-signed upload URL |
 
 ---
 
@@ -285,4 +287,3 @@ Example: Find all gyms within 5km of location
 ```
 GET /api/v1/gyms/search?latitude=40.7128&longitude=-74.0060&radiusKm=5
 ```
-
