@@ -5,9 +5,9 @@ services:
     image: postgis/postgis:15-3.4-alpine
     container_name: easybody-db
     environment:
-      POSTGRES_DB: ${DB_NAME:-easybody_db}
-      POSTGRES_USER: ${DB_USERNAME:-easybody_user}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-easybody_password_2024}
+      POSTGRES_DB: ${DB_NAME:-easybody}
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
     ports:
       - "${DB_PORT:-5432}:5432"
     volumes:
@@ -35,9 +35,9 @@ services:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
       DB_HOST: ${DB_HOST:-db}
       DB_PORT: ${DB_PORT:-5432}
-      DB_NAME: ${DB_NAME:-easybody_db}
-      DB_USERNAME: ${DB_USERNAME:-easybody_user}
-      DB_PASSWORD: ${DB_PASSWORD:-easybody_password_2024}
+      DB_NAME: ${DB_NAME:-easybody}
+      DB_USERNAME: ${DB_USERNAME:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
     ports:
       - "${APP_PORT:-8080}:8080"
     networks:

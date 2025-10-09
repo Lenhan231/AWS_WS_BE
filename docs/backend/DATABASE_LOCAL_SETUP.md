@@ -99,25 +99,23 @@ sudo -u postgres psql
 psql postgres
 ```
 
-### **Bước 2: Tạo Database và User**
+### **Bước 2: Tạo database (và user tuỳ chọn)**
 
 ```sql
--- Tạo database
-CREATE DATABASE easybody_db;
+-- Tạo database (nếu chưa có)
+CREATE DATABASE easybody;
 
--- Tạo user riêng cho application (khuyến nghị)
-CREATE USER easybody_user WITH PASSWORD 'easybody_password_2024';
-
--- Grant permissions
-GRANT ALL PRIVILEGES ON DATABASE easybody_db TO easybody_user;
+-- Tuỳ chọn: tạo user riêng cho ứng dụng thay vì dùng superuser postgres
+-- CREATE USER easybody_app WITH PASSWORD 'change_me_2024';
+-- GRANT ALL PRIVILEGES ON DATABASE easybody TO easybody_app;
 
 -- Kết nối vào database
-\c easybody_db
+\c easybody
 
--- Grant schema permissions
-GRANT ALL ON SCHEMA public TO easybody_user;
+-- Tuỳ chọn: phân quyền schema cho user riêng
+-- GRANT ALL ON SCHEMA public TO easybody_app;
 
--- Verify
+-- Kiểm tra nhanh
 \l  -- List databases
 \du -- List users
 ```
@@ -127,8 +125,8 @@ GRANT ALL ON SCHEMA public TO easybody_user;
 PostGIS cần thiết cho geo-location queries (tìm gyms/PTs gần user).
 
 ```sql
--- Kết nối vào easybody_db
-\c easybody_db
+-- Kết nối vào easybody
+\c easybody
 
 -- Enable PostGIS
 CREATE EXTENSION IF NOT EXISTS postgis;
@@ -160,8 +158,8 @@ sudo apt install postgresql-15-postgis-3
 ### **Bước 4: Enable pg_trgm (Optional - cho text search)**
 
 ```sql
--- Kết nối vào easybody_db
-\c easybody_db
+-- Kết nối vào easybody
+\c easybody
 
 -- Enable pg_trgm cho fuzzy text search
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
@@ -185,9 +183,9 @@ API_VERSION=v1
 # Database Configuration (LOCAL PostgreSQL)
 DB_HOST=localhost
 DB_PORT=5432
-DB_NAME=easybody_db
-DB_USER=easybody_user
-DB_PASSWORD=easybody_password_2024
+DB_NAME=easybody
+DB_USER=postgres
+DB_PASSWORD=postgres
 DB_DIALECT=postgres
 
 # AWS Cognito Configuration (sẽ setup sau)
@@ -232,8 +230,8 @@ ALLOWED_IMAGE_TYPES=image/jpeg,image/png,image/gif,image/webp
 ### **Test 1: Direct psql connection**
 
 ```bash
-psql -h localhost -p 5432 -U easybody_user -d easybody_db
-# Nhập password: easybody_password_2024
+psql -h localhost -p 5432 -U postgres -d easybody
+# hoặc nếu bạn tạo user riêng: psql -h localhost -p 5432 -U easybody_app -d easybody
 
 # Trong psql:
 SELECT version();
@@ -273,7 +271,10 @@ Sequelize sẽ tự động tạo tất cả tables:
 ### **Test 3: Verify tables created**
 
 ```bash
-psql -U easybody_user -d easybody_db
+psql -U postgres -d easybody
+
+-- hoặc nếu bạn tạo user riêng (ví dụ easybody_app):
+-- psql -U easybody_app -d easybody
 
 \dt  -- List all tables
 
@@ -311,9 +312,9 @@ psql -U easybody_user -d easybody_db
 ```
 Host: localhost
 Port: 5432
-Database: easybody_db
-Username: easybody_user
-Password: easybody_password_2024
+Database: easybody
+Username: postgres (hoặc user app riêng)
+Password: postgres (hoặc password bạn đặt)
 ```
 
 ---
@@ -324,34 +325,32 @@ Password: easybody_password_2024
 
 ```bash
 # Backup toàn bộ database
-pg_dump -U easybody_user -d easybody_db > backup_$(date +%Y%m%d).sql
+pg_dump -U postgres -d easybody > backup_$(date +%Y%m%d).sql
 
 # Backup chỉ schema (không có data)
-pg_dump -U easybody_user -d easybody_db --schema-only > schema_backup.sql
+pg_dump -U postgres -d easybody --schema-only > schema_backup.sql
 
 # Backup chỉ data
-pg_dump -U easybody_user -d easybody_db --data-only > data_backup.sql
+pg_dump -U postgres -d easybody --data-only > data_backup.sql
 ```
 
 ### **Restore Database**
 
 ```bash
 # Restore từ backup file
-psql -U easybody_user -d easybody_db < backup_20251006.sql
+psql -U postgres -d easybody < backup_20251006.sql
 ```
 
 ### **Reset Database**
 
 ```sql
 -- Xóa tất cả tables và tạo lại
-DROP DATABASE IF EXISTS easybody_db;
-CREATE DATABASE easybody_db;
-GRANT ALL PRIVILEGES ON DATABASE easybody_db TO easybody_user;
+DROP DATABASE IF EXISTS easybody;
+CREATE DATABASE easybody;
 
-\c easybody_db
+\c easybody
 CREATE EXTENSION IF NOT EXISTS postgis;
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
-GRANT ALL ON SCHEMA public TO easybody_user;
 ```
 
 ### **View Table Schema**
@@ -416,7 +415,7 @@ SELECT 'Offers:', COUNT(*) FROM offers;
 
 **Chạy seed data:**
 ```bash
-psql -U easybody_user -d easybody_db < seed-data.sql
+psql -U postgres -d easybody < seed-data.sql
 ```
 
 ---
@@ -426,13 +425,13 @@ psql -U easybody_user -d easybody_db < seed-data.sql
 ### **Lỗi: "password authentication failed"**
 ```sql
 -- Reset password
-ALTER USER easybody_user WITH PASSWORD 'new_password';
+ALTER USER postgres WITH PASSWORD 'new_password'; -- hoặc user riêng của bạn
 ```
 
 ### **Lỗi: "database does not exist"**
 ```bash
 # Tạo lại database
-createdb -U postgres easybody_db
+createdb -U postgres easybody
 ```
 
 ### **Lỗi: "could not connect to server"**
@@ -486,7 +485,7 @@ Production: AWS RDS Multi-AZ (khi production)
 ### **3. Regular Backups**
 ```bash
 # Tự động backup hàng ngày
-pg_dump -U easybody_user easybody_db > backup_$(date +%Y%m%d).sql
+pg_dump -U postgres easybody > backup_$(date +%Y%m%d).sql
 ```
 
 ### **4. Connection Pooling**
@@ -505,8 +504,8 @@ pool: {
 ## ✅ Checklist Setup PostgreSQL Local
 
 - [ ] Cài đặt PostgreSQL 15/16
-- [ ] Tạo database `easybody_db`
-- [ ] Tạo user `easybody_user`
+- [ ] Tạo database `easybody`
+- [ ] (Tuỳ chọn) Tạo user ứng dụng riêng (ví dụ easybody_app)
 - [ ] Enable PostGIS extension
 - [ ] Enable pg_trgm extension (optional)
 - [ ] Cập nhật `.env` với database credentials
@@ -524,14 +523,14 @@ Khi sẵn sàng deploy production:
 
 1. **Export data từ local:**
 ```bash
-pg_dump -U easybody_user easybody_db > production_migration.sql
+pg_dump -U postgres easybody > production_migration.sql
 ```
 
 2. **Setup AWS RDS** (xem AWS_SERVICES_REQUIRED.md)
 
 3. **Import data vào RDS:**
 ```bash
-psql -h easybody-db.xxx.rds.amazonaws.com -U easybody_admin -d easybody_db < production_migration.sql
+psql -h easybody-db.xxx.rds.amazonaws.com -U easybody_admin -d easybody < production_migration.sql
 ```
 
 4. **Update .env:**
@@ -545,4 +544,3 @@ DB_PASSWORD=<strong-password>
 ---
 
 **Xong! Bây giờ bạn đã có PostgreSQL local sẵn sàng cho development! 🎉**
-
