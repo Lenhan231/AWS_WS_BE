@@ -48,16 +48,16 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:easybody}
-    username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:postgres}
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:easybody_db}
+    username: ${DB_USERNAME:easybody_user}
+    password: ${DB_PASSWORD:easybody_password_2024}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
       ddl-auto: validate
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
+        dialect: org.hibernate.spatial.dialect.postgis.PostgisDialect
         format_sql: true
         jdbc:
           lob:
@@ -78,9 +78,9 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
   datasource:
-    url: jdbc:postgresql://${DB_HOST:your-rds-endpoint.amazonaws.com}:${DB_PORT:5432}/${DB_NAME:easybody}
-    username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:changeMe}
+    url: jdbc:postgresql://${DB_HOST:your-rds-endpoint.amazonaws.com}:${DB_PORT:5432}/${DB_NAME:easybody_db}
+    username: ${DB_USERNAME:easybody_user}
+    password: ${DB_PASSWORD:easybody_password_2024}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:

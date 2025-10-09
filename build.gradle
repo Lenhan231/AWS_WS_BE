@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.2.0'
     id 'io.spring.dependency-management' version '1.1.4'
+    id 'org.flywaydb.flyway' version '10.20.0'
 }
 
 group = 'com.easybody'
@@ -15,6 +16,7 @@ configurations {
     compileOnly {
         extendsFrom annotationProcessor
     }
+    flywayMigration
 }
 
 repositories {
@@ -33,11 +35,14 @@ dependencies {
 
     // Database layer
     implementation 'org.hibernate:hibernate-spatial:6.3.1.Final'
-    runtimeOnly 'org.postgresql:postgresql'
+    runtimeOnly 'org.postgresql:postgresql:42.7.4'
 
     // Schema migrations
-    implementation 'org.flywaydb:flyway-core'
-    implementation 'org.flywaydb:flyway-database-postgresql'
+    implementation 'org.flywaydb:flyway-core:10.20.0'
+    implementation 'org.flywaydb:flyway-database-postgresql:10.20.0'
+
+    flywayMigration 'org.postgresql:postgresql:42.7.4'
+    flywayMigration 'org.flywaydb:flyway-database-postgresql:10.20.0'
 
     // AWS integrations
     implementation 'software.amazon.awssdk:cognitoidentityprovider:2.21.0'
@@ -59,6 +64,17 @@ dependencies {
     // Testing
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
+}
+
+flyway {
+    url = System.getenv('DB_URL') ?: "jdbc:postgresql://${System.getenv('DB_HOST') ?: 'localhost'}:${System.getenv('DB_PORT') ?: '5432'}/${System.getenv('DB_NAME') ?: 'easybody_db'}"
+    user = System.getenv('DB_USERNAME') ?: 'easybody_user'
+    password = System.getenv('DB_PASSWORD') ?: 'easybody_password_2024'
+    schemas = ['public']
+    locations = ['classpath:db/migration']
+    baselineOnMigrate = true
+    driver = 'org.postgresql.Driver'
+    configurations = ['flywayMigration', 'runtimeClasspath']
 }
 
 tasks.named('test') {
