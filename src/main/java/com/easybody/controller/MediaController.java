@@ -1,3 +1,16 @@
+package com.easybody.controller;
+
+import com.easybody.dto.response.PresignedUrlResponse;
+import com.easybody.service.S3Service;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
 @RequestMapping("/api/v1/media")
 @RequiredArgsConstructor
 @Slf4j
@@ -12,12 +25,9 @@ public class MediaController {
 
         log.info("Generating presigned URL for folder: {}, extension: {}", folder, fileExtension);
 
-        // Validate folder
         if (!isValidFolder(folder)) {
             throw new IllegalArgumentException("Invalid folder. Allowed: profiles, offers, gyms");
         }
-
-        // Validate file extension
         if (!isValidFileExtension(fileExtension)) {
             throw new IllegalArgumentException("Invalid file extension. Allowed: jpg, jpeg, png, gif, webp");
         }
@@ -34,14 +44,3 @@ public class MediaController {
         return extension.matches("^(jpg|jpeg|png|gif|webp)$");
     }
 }
-package com.easybody.controller;
-
-import com.easybody.dto.response.PresignedUrlResponse;
-import com.easybody.service.S3Service;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-@RestController
-

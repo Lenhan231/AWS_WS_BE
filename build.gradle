@@ -16,7 +16,6 @@ configurations {
     compileOnly {
         extendsFrom annotationProcessor
     }
-    flywayMigration
 }
 
 repositories {
@@ -40,9 +39,6 @@ dependencies {
     // Schema migrations
     implementation 'org.flywaydb:flyway-core:10.20.0'
     implementation 'org.flywaydb:flyway-database-postgresql:10.20.0'
-
-    flywayMigration 'org.postgresql:postgresql:42.7.4'
-    flywayMigration 'org.flywaydb:flyway-database-postgresql:10.20.0'
 
     // AWS integrations
     implementation 'software.amazon.awssdk:cognitoidentityprovider:2.21.0'
@@ -74,7 +70,7 @@ flyway {
     locations = ['classpath:db/migration']
     baselineOnMigrate = true
     driver = 'org.postgresql.Driver'
-    configurations = ['flywayMigration', 'runtimeClasspath']
+    configurations = ['compileClasspath']
 }
 
 tasks.named('test') {

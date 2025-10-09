@@ -35,11 +35,11 @@ public class GymStaff {
 
     private String position;
 
-    @Column(nullable = false)
+    @Column(name = "can_manage_offers", nullable = false)
     @Builder.Default
     private Boolean canManageOffers = false;
 
-    @Column(nullable = false)
+    @Column(name = "can_manage_pts", nullable = false)
     @Builder.Default
     private Boolean canManagePTs = false;
 
@@ -55,4 +55,3 @@ public class GymStaff {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 }
-
