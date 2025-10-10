@@ -20,28 +20,40 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(csrf -> csrf.disable())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        // Public endpoints
-                        .requestMatchers("/api/v1/auth/**").permitAll()
-                        .requestMatchers("/api/v1/search/**").permitAll()
-                        .requestMatchers("/api/v1/gyms/search").permitAll()
-                        .requestMatchers("/api/v1/gyms/{id}").permitAll()
-                        .requestMatchers("/api/v1/pt-users/{id}").permitAll()
-                        .requestMatchers("/api/v1/offers/{id}").permitAll()
-                        .requestMatchers("/api/v1/ratings/offer/{offerId}").permitAll()
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/actuator/health").permitAll()
+        return http
+            .csrf(csrf -> csrf.disable())
+            .cors(cors -> cors.disable())
+            .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> auth
+                // ✅ Swagger/OpenAPI (không cần token)
+                .requestMatchers(
+                    "/swagger-ui.html",
+                    "/swagger-ui/**",
+                    "/v3/api-docs/**",
+                    "/v3/api-docs.yaml",
+                    "/swagger-resources/**",
+                    "/webjars/**",
+                    "/actuator/health"
+                ).permitAll()
 
-                        // Admin only endpoints
-                        .requestMatchers("/api/v1/admin/**").hasAuthority("ADMIN")
+                // ✅ Public endpoints đang có
+                .requestMatchers(
+                    "/api/v1/auth/**",
+                    "/api/v1/search/**",
+                    "/api/v1/gyms/search",
+                    "/api/v1/gyms/{id}",
+                    "/api/v1/pt-users/{id}",
+                    "/api/v1/offers/{id}",
+                    "/api/v1/ratings/offer/{offerId}"
+                ).permitAll()
 
-                        // All other requests require authentication
-                        .anyRequest().authenticated()
-                )
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                // ✅ Admin-only
+                .requestMatchers("/api/v1/admin/**").hasAuthority("ADMIN")
 
-        return http.build();
+                // ❗ Các endpoint còn lại yêu cầu token
+                .anyRequest().authenticated()
+            )
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+            .build();
     }
 }
