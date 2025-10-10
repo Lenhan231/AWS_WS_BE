@@ -1,3 +1,4 @@
+# Archived – không còn dùng cho Spring Boot/Postgres
 # Project Summary - Easy Body Backend
 
 ## ✅ Implementation Complete

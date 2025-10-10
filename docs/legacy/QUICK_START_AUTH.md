@@ -1,3 +1,4 @@
+# Archived – không còn dùng cho Spring Boot/Postgres
 # Quick Start Auth
 
 > ⚠️ Legacy Reference – quick test workflow for the old Node.js + SQL Server backend. The new Spring Boot service uses AWS Cognito and PostgreSQL (see [`../api/API_DOCUMENTATION.md`](../api/API_DOCUMENTATION.md)).

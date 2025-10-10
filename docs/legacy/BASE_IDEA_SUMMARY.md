@@ -1,3 +1,4 @@
+# Archived – không còn dùng cho Spring Boot/Postgres
 # Base Idea Archive (Legacy)
 
 Curated from original planning documents (Idea.docx, Layout.docx, Cấu trúc.docx) and early markdown drafts. Use this as a historical reference; current implementation details live in `docs/PROJECT_OVERVIEW.md`.
