@@ -3,6 +3,7 @@ package com.easybody.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -46,6 +47,11 @@ public class SecurityConfig {
                     "/api/v1/offers/{id}",
                     "/api/v1/ratings/offer/{offerId}"
                 ).permitAll()
+
+                // ✅ Role-based business rules
+                .requestMatchers(HttpMethod.POST, "/api/v1/gyms").hasAuthority("GYM_STAFF")
+                .requestMatchers(HttpMethod.PUT, "/api/v1/gyms/**").hasAuthority("GYM_STAFF")
+                .requestMatchers(HttpMethod.POST, "/api/v1/gyms/**/assign-pt").hasAuthority("GYM_STAFF")
 
                 // ✅ Admin-only
                 .requestMatchers("/api/v1/admin/**").hasAuthority("ADMIN")

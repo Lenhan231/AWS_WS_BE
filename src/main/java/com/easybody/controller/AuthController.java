@@ -21,6 +21,7 @@ public class AuthController {
 
     private final UserService userService;
 
+    @SecurityRequirement(name = "bearerAuth")
     @PostMapping("/register")
     public ResponseEntity<UserResponse> register(
             @Valid @RequestBody UserRegistrationRequest request,
