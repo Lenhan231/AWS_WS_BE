@@ -41,9 +41,18 @@ Although the Spring Boot migration replaces this code path, carrying the lessons
 
 ---
 
+## 3. Engineering Log (10 Oct 2025)
+
+- Rebuilt broken Spring components (`OfferService`, `OfferResponse`, `OfferSearchResponse`, `MediaController`) so the project compiles on Java 21.
+- Enabled Flyway migrations end-to-end, added idempotent seed script (`V3__seed_minimal_data.sql`), and wired the Gradle plugin for local db bootstrap.
+- Added global OpenAPI bearer security (`OpenApiConfig`) and marked protected endpoints so Swagger now attaches JWT headers automatically.
+- Tightened `SecurityConfig`: swagger/public routes remain open, while gym creation/assignment now requires `GYM_STAFF` authority and admin routes stay locked to `ADMIN`.
+- Generated dev JWT helpers for Postman/Swagger testing, verified `/api/v1/auth/register`, gym + PT flows, and ratings with the new seed data.
+
+---
+
 ## 3. Next Actions
 
-1. Finish migrating database bootstrap to Flyway (`V1__init_extensions_and_indexes.sql`, `V2__offer_rating_trigger.sql`) and retire ad-hoc `docker/initdb` seeding when production-ready.
+1. Monitor new Flyway bootstrap (`V0__create_core_tables.sql` + V1–V3) and remove any remaining references to the old Docker init script in downstream docs/scripts.
 2. Expand automated tests around security & moderation once Flyway stabilises schema baseline.
 3. Keep this plan living—update roadmap and archive sections after each sprint so onboarding engineers understand both current scope and historical context.
-

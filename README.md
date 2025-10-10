@@ -132,6 +132,29 @@ Frontend → Cognito Hosted UI / Amplify → JWT → Spring Boot (`/api/v1/auth/
   ```
 - Legacy auth (Node.js + SQL Server) lưu tại [`docs/legacy/QUICK_START_AUTH.md`](docs/legacy/QUICK_START_AUTH.md).
 
+### 👩‍💻 Local testing (Swagger/Postman)
+1. `./gradlew bootRun` → Flyway migrate + seed.
+2. Mở `http://localhost:8080/swagger-ui.html` (hoặc Postman).
+3. **Authorize** và paste JWT dev (không kèm chữ `Bearer`):
+   ```
+   eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzZWVkLWFkbWluMy1zdWIiLCJjdXN0b206cm9sZSI6IkFETUlOIiwiZW1haWwiOiJkZW1vLmFkbWluQGVhc3lib2R5LmNvbSIsImV4cCI6MTg5MzQ1NjAwMH0.2KG9-ByhYx7dsXRC1fPIxQnjZFy_I4PUHsHbU_KmvSo
+   ```
+   (HS256, secret dev `local-dev-secret`, `sub = seed-admin3-sub`, role `ADMIN`.)
+4. Gọi `POST /api/v1/auth/register` với payload role tương ứng → user mới sẽ xuất hiện trong bảng `users`.
+
+Tự generate token khác (ví dụ cho `GYM_STAFF`) bằng Python:
+```python
+import jwt, datetime
+secret = "local-dev-secret"
+payload = {
+  "sub": "seed-gymstaff2-sub",
+  "custom:role": "GYM_STAFF",
+  "email": "gymstaff2@easybody.com",
+  "exp": int((datetime.datetime.utcnow() + datetime.timedelta(days=3650)).timestamp())
+}
+print(jwt.encode(payload, secret, algorithm="HS256"))
+```
+
 ---
 
 ## 🌐 6. API Overview
@@ -255,4 +278,3 @@ Các tài liệu này chỉ dùng đối chiếu lịch sử; production hiện 
 
 Proprietary © EasyBody Team 2025  
 *For FCJ Bootcamp & internal demonstration use.*
-
