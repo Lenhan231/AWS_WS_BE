@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.amazonaws</groupId>
+  <artifactId>aws-xray-recorder-sdk-core</artifactId>
+  <version>2.15.0</version>
+  <name>AWS X-Ray Recorder SDK for Java - Core</name>
+  <description>The Amazon Web Services X-Ray Recorder SDK for Java provides Java APIs for emitting tracing data to AWS X-Ray. AWS X-Ray helps developers analyze and debug distributed applications. With X-Ray, you can understand how your application and its underlying services are performing to identify and troubleshoot the root cause of performance issues and errors.</description>
+  <url>https://aws.amazon.com/documentation/xray/</url>
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>https://aws.amazon.com/apache2.0</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <id>amazonwebservices</id>
+      <organization>Amazon Web Services</organization>
+      <organizationUrl>https://aws.amazon.com</organizationUrl>
+      <roles>
+        <role>developer</role>
+      </roles>
+    </developer>
+  </developers>
+  <scm>
+    <url>https://github.com/aws/aws-xray-sdk-java.git</url>
+  </scm>
+  <properties>
+    <awsxrayrecordersdk.version>2.15.0</awsxrayrecordersdk.version>
+  </properties>
+  <dependencies>
+    <dependency>
+      <groupId>com.amazonaws</groupId>
+      <artifactId>aws-java-sdk-xray</artifactId>
+      <version>1.12.228</version>
+      <scope>compile</scope>
+    </dependency>
+  </dependencies>
+</project>

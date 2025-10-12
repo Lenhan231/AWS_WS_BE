@@ -48,6 +48,7 @@ Although the Spring Boot migration replaces this code path, carrying the lessons
 - Added global OpenAPI bearer security (`OpenApiConfig`) and marked protected endpoints so Swagger now attaches JWT headers automatically.
 - Tightened `SecurityConfig`: swagger/public routes remain open, while gym creation/assignment now requires `GYM_STAFF` authority and admin routes stay locked to `ADMIN`.
 - Generated dev JWT helpers for Postman/Swagger testing, verified `/api/v1/auth/register`, gym + PT flows, and ratings with the new seed data.
+- Migrated the old Docker init schema into `V0__create_core_tables.sql`, removed the legacy Node.js service artifacts, and confirmed a fresh Postgres volume is bootstrapped entirely by Flyway.
 
 ---
 
