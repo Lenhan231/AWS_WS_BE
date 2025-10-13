@@ -1,0 +1,48 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# IDE
+.idea
+.vscode
+*.iml
+*.ipr
+*.iws
+
+# Build artifacts
+build/
+target/
+.gradle/
+out/
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Documentation (không cần trong Docker image)
+docs/
+*.md
+!README.md
+
+# Test files (không cần trong production image)
+src/test/
+
+# Config files (sẽ dùng environment variables)
+.env
+.env.*
+!.env.example
+
+# Deployment configs (không cần trong image)
+railway.json
+railway-no-docker.json
+render.yaml
+fly.toml
+docker-compose.yml
+
+# Kiro specs
+.kiro/

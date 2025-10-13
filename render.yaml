@@ -5,9 +5,9 @@ services:
   # Spring Boot API Service
   - type: web
     name: easybody-api
-    env: docker
-    dockerfilePath: ./Dockerfile
-    dockerContext: .
+    env: java
+    buildCommand: "./gradlew clean bootJar --no-daemon"
+    startCommand: "java -jar build/libs/*.jar"
     plan: free
     region: singapore
     healthCheckPath: /actuator/health

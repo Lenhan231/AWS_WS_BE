@@ -1,10 +1,13 @@
 FROM gradle:8.5-jdk21-alpine AS builder
 WORKDIR /home/gradle/project
 
-# Copy Gradle wrapper and project metadata first to leverage build cache
+# Copy Gradle wrapper files first (order matters!)
+COPY gradlew ./
 COPY gradle ./gradle
-COPY gradlew settings.gradle build.gradle ./
 RUN chmod +x gradlew
+
+# Copy project metadata to leverage build cache
+COPY settings.gradle build.gradle ./
 
 # Copy application source
 COPY src ./src
