@@ -55,15 +55,17 @@
    - Tab "Variables"
    - Add variables:
    
-   ```bash
-   SPRING_PROFILES_ACTIVE=staging
-   JDBC_DATABASE_URL=jdbc:postgresql://${{Postgres.PGHOST}}:${{Postgres.PGPORT}}/${{Postgres.PGDATABASE}}?sslmode=require
-   JDBC_DATABASE_USERNAME=${{Postgres.PGUSER}}
-   JDBC_DATABASE_PASSWORD=${{Postgres.PGPASSWORD}}
-   CORS_ALLOWED_ORIGINS=https://aws-ws-fe.vercel.app,http://localhost:3000
-   AWS_ENABLED=false
-   SHOW_SQL=false
-   ```
+  ```bash
+  SPRING_PROFILES_ACTIVE=staging
+  JDBC_DATABASE_URL=jdbc:postgresql://postgis-urev.railway.internal:5432/railway?sslmode=require
+  JDBC_DATABASE_USERNAME=postgres
+  JDBC_DATABASE_PASSWORD=${{Postgres.PGPASSWORD}}
+  CORS_ALLOWED_ORIGINS=https://aws-ws-fe.vercel.app,http://localhost:3000
+  AWS_ENABLED=false
+  SHOW_SQL=false
+  ```
+
+  > 📝 **Tip:** Railway currently names the managed Postgres host `postgis-urev`. Always copy the private host from the DB service details and keep the username `postgres`—even if the UI suggests `postgre`. Recheck these two values whenever the database service is recreated to avoid failed redeploys.
 
 6. **Redeploy**
    - Click "Deploy" → "Redeploy"

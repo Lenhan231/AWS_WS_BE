@@ -56,14 +56,14 @@ SPRING_DATASOURCE_PASSWORD=postgres \
 Env bắt buộc:
 ```
 SPRING_PROFILES_ACTIVE=staging
-JDBC_DATABASE_URL=jdbc:postgresql://<PGHOST>:5432/<POSTGRES_DB>?sslmode=require
-JDBC_DATABASE_USERNAME=<POSTGRES_USER>
+JDBC_DATABASE_URL=jdbc:postgresql://postgis-urev.railway.internal:5432/railway?sslmode=require
+JDBC_DATABASE_USERNAME=postgres
 JDBC_DATABASE_PASSWORD=<POSTGRES_PASSWORD>
 AWS_ENABLED=false
 CORS_ALLOWED_ORIGINS=https://aws-ws-fe.vercel.app,http://localhost:3000
 ```
 
-> `<PGHOST>` lấy từ biến `PGHOST` của service PostGIS (Railway Private Domain). Không dùng cú pháp `${{service.VARIABLE}}` nếu thấy hệ thống không render, hãy copy giá trị thực.
+> ✅ **Double-check before deploy:** Railway hiện đặt tên private host là `postgis-urev.railway.internal`. Luôn copy chính xác host này từ tab **Connect** của service PostGIS và giữ username là `postgres` (mặc dù UI đôi khi hiển thị `postgre`). Nếu service DB bị recreate, cập nhật lại hai giá trị này rồi hãy redeploy.
 
 Redeploy để Flyway migrate (log mong đợi: `Schema "public" is up to date`).
 
@@ -103,4 +103,3 @@ AWS_ENABLED=true
 | Flyway báo `extension "postgis" is not available` | DB không cài PostGIS | Đảm bảo dùng image PostGIS hoặc cài extension trên RDS |
 | Railway healthcheck 503 | Thiếu `SPRING_PROFILES_ACTIVE=staging` hoặc `JDBC_DATABASE_*` | Kiểm tra biến env và copy đúng giá trị từ service PostGIS |
 | Gradle build fail `GradleWrapperMain` | `gradle-wrapper.jar` bị ignore | Đã commit wrapper jar để Docker build thành công |
-
