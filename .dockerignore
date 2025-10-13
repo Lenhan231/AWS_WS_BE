@@ -10,17 +10,11 @@
 *.ipr
 *.iws
 
-# Build artifacts
+# Build artifacts (but NOT gradle wrapper!)
 build/
 target/
-.gradle/
 out/
-
-# IMPORTANT: Don't ignore gradle wrapper (needed for Docker build)
-!gradle/
-!gradle/wrapper/
-!gradle/wrapper/gradle-wrapper.jar
-!gradle/wrapper/gradle-wrapper.properties
+# Note: .gradle/ cache is excluded but gradle/ wrapper is included
 
 # Logs
 *.log
