@@ -74,6 +74,8 @@ docker compose up -d db
 ./gradlew bootRun
 ```
 
+> Muốn xem chi tiết cho từng môi trường (`local`, `staging` trên Railway, `prod` AWS) đọc thêm [`docs/deployment/ENVIRONMENT_PLAYBOOK.md`](docs/deployment/ENVIRONMENT_PLAYBOOK.md).
+
 **Dockerfile (multi-stage)**
 ```dockerfile
 FROM gradle:8.5-jdk21-alpine AS builder
