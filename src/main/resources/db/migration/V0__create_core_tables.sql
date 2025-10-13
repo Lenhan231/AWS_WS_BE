@@ -2,9 +2,11 @@
 -- EasyBody relational schema & seed data for local development
 -- Executed automatically when the Postgres container is created with an empty volume.
 
+
 BEGIN;
 
 CREATE EXTENSION IF NOT EXISTS postgis;
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Utility trigger to bump updated_at on every modification
 CREATE OR REPLACE FUNCTION set_updated_at()
