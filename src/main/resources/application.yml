@@ -3,6 +3,8 @@ spring:
     name: easybody
   profiles:
     default: local
+  jpa:
+    open-in-view: false
 
 aws:
   enabled: ${AWS_ENABLED:false}
@@ -60,7 +62,7 @@ spring:
       ddl-auto: validate
     properties:
       hibernate:
-        dialect: org.hibernate.spatial.dialect.postgis.PostgisPG95Dialect
+        dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
         jdbc:
           lob:
@@ -89,6 +91,9 @@ spring:
     hibernate:
       ddl-auto: validate
     show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
   sql:
     init:
       mode: never
