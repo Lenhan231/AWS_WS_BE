@@ -56,12 +56,10 @@
    - Add variables:
    
    ```bash
-   SPRING_PROFILES_ACTIVE=aws
-   DB_HOST=${{Postgres.PGHOST}}
-   DB_PORT=${{Postgres.PGPORT}}
-   DB_NAME=${{Postgres.PGDATABASE}}
-   DB_USERNAME=${{Postgres.PGUSER}}
-   DB_PASSWORD=${{Postgres.PGPASSWORD}}
+   SPRING_PROFILES_ACTIVE=staging
+   JDBC_DATABASE_URL=jdbc:postgresql://${{Postgres.PGHOST}}:${{Postgres.PGPORT}}/${{Postgres.PGDATABASE}}?sslmode=require
+   JDBC_DATABASE_USERNAME=${{Postgres.PGUSER}}
+   JDBC_DATABASE_PASSWORD=${{Postgres.PGPASSWORD}}
    CORS_ALLOWED_ORIGINS=https://aws-ws-fe.vercel.app,http://localhost:3000
    AWS_ENABLED=false
    SHOW_SQL=false
@@ -102,9 +100,12 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 \q
 
 # 7. Set environment variables
-railway variables set SPRING_PROFILES_ACTIVE=aws
+railway variables set SPRING_PROFILES_ACTIVE=staging
 railway variables set CORS_ALLOWED_ORIGINS=https://aws-ws-fe.vercel.app
 railway variables set AWS_ENABLED=false
+railway variables set JDBC_DATABASE_URL="$(railway variables get DATABASE_URL)?sslmode=require"
+railway variables set JDBC_DATABASE_USERNAME="$(railway variables get PGUSER)"
+railway variables set JDBC_DATABASE_PASSWORD="$(railway variables get PGPASSWORD)"
 
 # 8. Deploy
 railway up
@@ -131,12 +132,10 @@ PGUSER=postgres
 PGPASSWORD=xxx
 
 # Manual config
-SPRING_PROFILES_ACTIVE=aws
-DB_HOST=${{Postgres.PGHOST}}
-DB_PORT=${{Postgres.PGPORT}}
-DB_NAME=${{Postgres.PGDATABASE}}
-DB_USERNAME=${{Postgres.PGUSER}}
-DB_PASSWORD=${{Postgres.PGPASSWORD}}
+SPRING_PROFILES_ACTIVE=staging
+JDBC_DATABASE_URL=jdbc:postgresql://${{Postgres.PGHOST}}:${{Postgres.PGPORT}}/${{Postgres.PGDATABASE}}?sslmode=require
+JDBC_DATABASE_USERNAME=${{Postgres.PGUSER}}
+JDBC_DATABASE_PASSWORD=${{Postgres.PGPASSWORD}}
 CORS_ALLOWED_ORIGINS=https://aws-ws-fe.vercel.app
 AWS_ENABLED=false
 ```

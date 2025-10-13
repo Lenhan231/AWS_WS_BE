@@ -1,3 +1,12 @@
+server:
+  port: ${PORT:8080}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
 spring:
   application:
     name: easybody
@@ -5,6 +14,16 @@ spring:
     default: local
   jpa:
     open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          lob:
+            non_contextual_creation: true
+  flyway:
+    enabled: true
 
 aws:
   enabled: ${AWS_ENABLED:false}
@@ -41,59 +60,3 @@ logging:
     com.easybody: DEBUG
     org.springframework.security: DEBUG
     org.hibernate.SQL: ${SQL_LOG_LEVEL:INFO}
-
----
-# Local-first profile for API validation
-spring:
-  config:
-    activate:
-      on-profile: local
-  flyway:
-    enabled: true
-    locations: classpath:db/migration
-    baseline-on-migrate: true
-  datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:easybody}
-    username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:postgres}
-    driver-class-name: org.postgresql.Driver
-  jpa:
-    hibernate:
-      ddl-auto: validate
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: true
-        jdbc:
-          lob:
-            non_contextual_creation: true
-    show-sql: ${SHOW_SQL:true}
-  sql:
-    init:
-      mode: never
-
----
-# AWS-ready profile stub; supply real RDS/AWS values through env when deploying
-spring:
-  config:
-    activate:
-      on-profile: aws
-  flyway:
-    enabled: true
-    locations: classpath:db/migration
-    baseline-on-migrate: true
-  datasource:
-    url: jdbc:postgresql://${DB_HOST:your-rds-endpoint.amazonaws.com}:${DB_PORT:5432}/${DB_NAME:easybody}
-    username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:changeMe}
-    driver-class-name: org.postgresql.Driver
-  jpa:
-    hibernate:
-      ddl-auto: validate
-    show-sql: false
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-  sql:
-    init:
-      mode: never

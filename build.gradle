@@ -63,9 +63,11 @@ dependencies {
 }
 
 flyway {
-    url = System.getenv('DB_URL') ?: "jdbc:postgresql://${System.getenv('DB_HOST') ?: 'localhost'}:${System.getenv('DB_PORT') ?: '5432'}/${System.getenv('DB_NAME') ?: 'easybody'}"
-    user = System.getenv('DB_USERNAME') ?: 'postgres'
-    password = System.getenv('DB_PASSWORD') ?: 'postgres'
+    url = System.getenv('JDBC_DATABASE_URL') ?:
+          System.getenv('DB_URL') ?:
+          "jdbc:postgresql://${System.getenv('DB_HOST') ?: 'localhost'}:${System.getenv('DB_PORT') ?: '5432'}/${System.getenv('DB_NAME') ?: 'easybody'}"
+    user = System.getenv('JDBC_DATABASE_USERNAME') ?: System.getenv('DB_USERNAME') ?: 'postgres'
+    password = System.getenv('JDBC_DATABASE_PASSWORD') ?: System.getenv('DB_PASSWORD') ?: 'postgres'
     schemas = ['public']
     locations = ['classpath:db/migration']
     baselineOnMigrate = true

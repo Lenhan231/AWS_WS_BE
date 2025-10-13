@@ -1,33 +1,20 @@
 FROM gradle:8.5-jdk21-alpine AS builder
 WORKDIR /app
 
-# Copy Gradle wrapper and make it executable
-COPY gradlew ./
-COPY gradle gradle/
-RUN chmod +x gradlew
+COPY settings.gradle* build.gradle* gradlew ./
+COPY gradle/wrapper ./gradle/wrapper
+RUN chmod +x gradlew && ./gradlew --no-daemon help
 
-# Copy project files
-COPY settings.gradle build.gradle ./
-
-# Download dependencies (cached layer)
-RUN ./gradlew dependencies --no-daemon || true
-
-# Copy source code
-COPY src src/
-
-# Build the application
-RUN ./gradlew clean bootJar --no-daemon
+COPY src ./src
+RUN ./gradlew --no-daemon clean bootJar
 
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 
-# Allow overriding runtime options and Spring profile
-ENV SPRING_PROFILES_ACTIVE=aws \
-    JAVA_OPTS="-Xmx512m -Xms256m"
+COPY --from=builder /app/build/libs/*.jar /app/app.jar
 
-# Copy the built jar from builder stage
-COPY --from=builder /app/build/libs/*.jar app.jar
+ENV JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=75 -XX:+ExitOnOutOfMemoryError"
 
 EXPOSE 8080
 
-ENTRYPOINT ["sh", "-c", "java ${JAVA_OPTS} -jar app.jar"]
+ENTRYPOINT ["sh","-c","java -Dserver.port=${PORT:-8080} -jar /app/app.jar"]
