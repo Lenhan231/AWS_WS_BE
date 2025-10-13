@@ -19,6 +19,9 @@ aws:
   cloudwatch:
     namespace: EasyBody
 
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:3001,https://aws-ws-fe.vercel.app}
+
 app:
   search:
     default-radius-km: 10
