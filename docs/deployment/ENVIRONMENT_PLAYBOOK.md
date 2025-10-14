@@ -30,6 +30,8 @@ SPRING_DATASOURCE_PASSWORD=postgres \
 
 > Nếu volume `pg-data` bị seed bằng credential khác, tra lại giá trị thực qua `docker compose exec db env` và sửa ba biến trên cho khớp.
 
+> 💡 Flyway ở profile `local` sẽ tự load thêm `classpath:db/seed` (file `R__seed_mock_data.sql`) để đổ 15 mẫu dữ liệu cho mỗi bảng phục vụ demo. Các môi trường staging/prod chỉ chạy `db/migration` nên sẽ không bị ảnh hưởng.
+
 ---
 
 ### 2. Railway Staging
