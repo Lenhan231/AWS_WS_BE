@@ -14,6 +14,7 @@ WORKDIR /app
 COPY --from=builder /app/build/libs/*.jar /app/app.jar
 
 ENV JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=75 -XX:+ExitOnOutOfMemoryError"
+ENV SPRING_SQL_INIT_CONTINUE_ON_ERROR=false
 
 EXPOSE 8080
 

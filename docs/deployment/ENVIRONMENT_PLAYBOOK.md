@@ -65,6 +65,13 @@ CORS_ALLOWED_ORIGINS=https://aws-ws-fe.vercel.app,http://localhost:3000
 
 > ✅ **Double-check before deploy:** Railway hiện đặt tên private host là `postgis-urev.railway.internal`. Luôn copy chính xác host này từ tab **Connect** của service PostGIS và giữ username là `postgres` (mặc dù UI đôi khi hiển thị `postgre`). Nếu service DB bị recreate, cập nhật lại hai giá trị này rồi hãy redeploy.
 
+> 🧩 **Ổn định deploy 99%:**  
+> - `application.yml` đã bật health probes (`management.endpoint.health.probes.enabled=true`) + `spring.main.lazy-initialization=true` để Spring lên nhanh hơn.  
+> - Hikari chờ DB tối đa 60s (`spring.datasource.hikari.initialization-fail-timeout=60000`).  
+> - Dockerfile đặt `SPRING_SQL_INIT_CONTINUE_ON_ERROR=false` để fail-fast nếu DB chưa sẵn sàng.  
+> - Trong Railway nhớ tăng *Healthcheck Timeout* lên 180–300s để JVM kịp khởi động.  
+> - Nếu cần theo dõi, bật log `org.springframework.boot.actuate` ở mức DEBUG (đã cấu hình sẵn).
+
 Redeploy để Flyway migrate (log mong đợi: `Schema "public" is up to date`).
 
 ---

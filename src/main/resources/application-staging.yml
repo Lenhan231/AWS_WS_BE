@@ -2,6 +2,8 @@ spring:
   config:
     activate:
       on-profile: staging
+  main:
+    lazy-initialization: true
   datasource:
     url: ${JDBC_DATABASE_URL:jdbc:postgresql://${DB_HOST}:${DB_PORT:5432}/${DB_NAME}?sslmode=require}
     username: ${JDBC_DATABASE_USERNAME:${DB_USERNAME}}
@@ -9,6 +11,7 @@ spring:
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 8
+      initialization-fail-timeout: 60000
   jpa:
     show-sql: false
   flyway:

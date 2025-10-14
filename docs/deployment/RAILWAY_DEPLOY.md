@@ -67,6 +67,13 @@
 
   > 📝 **Tip:** Railway currently names the managed Postgres host `postgis-urev`. Always copy the private host from the DB service details and keep the username `postgres`—even if the UI suggests `postgre`. Recheck these two values whenever the database service is recreated to avoid failed redeploys.
 
+  **Stability tweaks (recommended)**
+  - Healthcheck: app exposes `/actuator/health/liveness` via `application.yml` (`management.endpoint.health.probes.enabled=true`) so Railway can succeed before DB warmup.
+  - Startup resilience: base `application.yml` includes `spring.datasource.hikari.initialization-fail-timeout: 60000` & `spring.main.lazy-initialization: true`.
+  - Dockerfile sets `SPRING_SQL_INIT_CONTINUE_ON_ERROR=false` to fail fast if DB unavailable instead of passing a 200.
+  - After every deploy, bump Railway **Healthcheck Timeout** (Settings → Deploy) to 180–300s so JVM cold starts have time to boot.
+  - Logging: actuator namespace raised to DEBUG to monitor readiness behaviour.
+
 6. **Redeploy**
    - Click "Deploy" → "Redeploy"
    - Hoặc push code mới lên GitHub (auto deploy)
