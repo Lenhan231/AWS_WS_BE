@@ -1,17 +1,17 @@
 DO $$
 DECLARE
-    admin_id BIGINT;
+    v_admin_user_id BIGINT;
     i INT;
-    gym_location_id BIGINT;
-    pt_location_id BIGINT;
-    client_location_id BIGINT;
-    gym_id BIGINT;
-    gym_staff_user_id BIGINT;
-    pt_user_account_id BIGINT;
-    pt_profile_id BIGINT;
-    client_user_account_id BIGINT;
+    v_gym_location_id BIGINT;
+    v_pt_location_id BIGINT;
+    v_client_location_id BIGINT;
+    v_gym_id BIGINT;
+    v_gym_staff_user_id BIGINT;
+    v_pt_user_account_id BIGINT;
+    v_pt_profile_id BIGINT;
+    v_client_user_account_id BIGINT;
     v_offer_id BIGINT;
-    association_status VARCHAR(32);
+    v_association_status VARCHAR(32);
     base_created_at TIMESTAMPTZ;
 BEGIN
     SELECT id INTO admin_id
@@ -30,7 +30,7 @@ BEGIN
             base_created_at,
             base_created_at
         )
-        RETURNING id INTO gym_location_id;
+        RETURNING id INTO v_gym_location_id;
 
         INSERT INTO gyms (
             name,
@@ -62,13 +62,13 @@ BEGIN
             FORMAT('+8488800%04s', 1000 + i),
             FORMAT('mock.gym%s@easybody.vn', i),
             FORMAT('https://gym%s.easybody.vn', i),
-            gym_location_id,
+            v_gym_location_id,
             TRUE,
             (i % 3 <> 0),
             base_created_at,
             base_created_at
         )
-        RETURNING id INTO gym_id;
+        RETURNING id INTO v_gym_id;
 
         INSERT INTO users (
             cognito_sub,
@@ -94,7 +94,7 @@ BEGIN
             base_created_at,
             base_created_at
         )
-        RETURNING id INTO gym_staff_user_id;
+        RETURNING id INTO v_gym_staff_user_id;
 
         INSERT INTO gym_staff (
             user_id,
@@ -106,8 +106,8 @@ BEGIN
             created_at,
             updated_at
         ) VALUES (
-            gym_staff_user_id,
-            gym_id,
+            v_gym_staff_user_id,
+            v_gym_id,
             FORMAT('Manager #%s', i),
             (i % 2 = 0),
             (i % 3 = 0),
@@ -125,7 +125,7 @@ BEGIN
             base_created_at,
             base_created_at
         )
-        RETURNING id INTO pt_location_id;
+        RETURNING id INTO v_pt_location_id;
 
         INSERT INTO users (
             cognito_sub,
@@ -151,7 +151,7 @@ BEGIN
             base_created_at,
             base_created_at
         )
-        RETURNING id INTO pt_user_account_id;
+        RETURNING id INTO v_pt_user_account_id;
 
         INSERT INTO pt_users (
             user_id,
@@ -167,21 +167,21 @@ BEGIN
             updated_at
         )
         VALUES (
-            pt_user_account_id,
+            v_pt_user_account_id,
             'Mock PT providing personalised hybrid programmes.',
             'Strength, Conditioning, Mobility',
             'NASM CPT, Mock Nutrition',
             3 + (i % 7),
             FORMAT('https://picsum.photos/seed/mock-pt-profile-%s/320/320', i),
-            pt_location_id,
+            v_pt_location_id,
             TRUE,
             (i % 4 <> 0),
             base_created_at,
             base_created_at
         )
-        RETURNING id INTO pt_profile_id;
+        RETURNING id INTO v_pt_profile_id;
 
-        association_status := CASE
+        v_association_status := CASE
             WHEN i % 3 = 0 THEN 'REJECTED'
             WHEN i % 3 = 1 THEN 'APPROVED'
             ELSE 'PENDING'
@@ -197,12 +197,12 @@ BEGIN
             created_at,
             updated_at
         ) VALUES (
-            gym_id,
-            pt_profile_id,
-            association_status,
-            CASE WHEN association_status = 'REJECTED' THEN 'Mock rejection reason' ELSE NULL END,
-            CASE WHEN association_status = 'APPROVED' THEN gym_staff_user_id ELSE NULL END,
-            CASE WHEN association_status = 'APPROVED' THEN base_created_at ELSE NULL END,
+            v_gym_id,
+            v_pt_profile_id,
+            v_association_status,
+            CASE WHEN v_association_status = 'REJECTED' THEN 'Mock rejection reason' ELSE NULL END,
+            CASE WHEN v_association_status = 'APPROVED' THEN v_gym_staff_user_id ELSE NULL END,
+            CASE WHEN v_association_status = 'APPROVED' THEN base_created_at ELSE NULL END,
             base_created_at,
             base_created_at
         );
@@ -216,7 +216,7 @@ BEGIN
             base_created_at,
             base_created_at
         )
-        RETURNING id INTO client_location_id;
+        RETURNING id INTO v_client_location_id;
 
         INSERT INTO users (
             cognito_sub,
@@ -242,7 +242,7 @@ BEGIN
             base_created_at,
             base_created_at
         )
-        RETURNING id INTO client_user_account_id;
+        RETURNING id INTO v_client_user_account_id;
 
         INSERT INTO client_users (
             user_id,
@@ -253,8 +253,8 @@ BEGIN
             updated_at
         )
         VALUES (
-            client_user_account_id,
-            client_location_id,
+            v_client_user_account_id,
+            v_client_location_id,
             FORMAT('Goal set #%s: Gain lean muscle, improve endurance.', i),
             'Functional training, HIIT, Yoga',
             base_created_at,
@@ -287,7 +287,7 @@ BEGIN
                 FORMAT('Mock Gym Offer #%s', i),
                 'Unlimited access to mock facilities with recovery support.',
                 'GYM_OFFER',
-                gym_id,
+                v_gym_id,
                 NULL,
                 800000 + (i * 10000),
                 'VND',
@@ -296,7 +296,7 @@ BEGIN
                 'APPROVED',
                 0,
                 NULL,
-                gym_staff_user_id,
+                v_gym_staff_user_id,
                 base_created_at,
                 0,
                 0,
@@ -332,7 +332,7 @@ BEGIN
                 'One-on-one coaching block focused on compound lifts and mobility.',
                 'PT_OFFER',
                 NULL,
-                pt_profile_id,
+                v_pt_profile_id,
                 1500000 + (i * 20000),
                 'VND',
                 FORMAT('%s personal sessions', 5 + (i % 6)),
@@ -361,7 +361,7 @@ BEGIN
         )
         VALUES (
             v_offer_id,
-            client_user_account_id,
+            v_client_user_account_id,
             ((i - 1) % 5) + 1,
             FORMAT('Mock feedback #%s - enjoyable sessions!', i),
             base_created_at,
@@ -383,9 +383,9 @@ BEGIN
             updated_at
         )
         VALUES (
-            client_user_account_id,
+            v_client_user_account_id,
             v_offer_id,
-            CASE WHEN i % 2 = 0 THEN pt_user_account_id ELSE gym_staff_user_id END,
+            CASE WHEN i % 2 = 0 THEN v_pt_user_account_id ELSE v_gym_staff_user_id END,
             FORMAT('Mock report reason #%s', i),
             'Auto-generated mock report for QA scenarios.',
             CASE WHEN i % 4 = 0 THEN 'RESOLVED' ELSE 'PENDING' END,
