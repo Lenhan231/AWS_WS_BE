@@ -10,7 +10,7 @@ DECLARE
     pt_user_account_id BIGINT;
     pt_profile_id BIGINT;
     client_user_account_id BIGINT;
-    offer_id BIGINT;
+    v_offer_id BIGINT;
     association_status VARCHAR(32);
     base_created_at TIMESTAMPTZ;
 BEGIN
@@ -304,7 +304,7 @@ BEGIN
                 base_created_at,
                 base_created_at
             )
-            RETURNING id INTO offer_id;
+            RETURNING id INTO v_offer_id;
         ELSE
             INSERT INTO offers (
                 title,
@@ -348,11 +348,11 @@ BEGIN
                 base_created_at,
                 base_created_at
             )
-            RETURNING id INTO offer_id;
+            RETURNING id INTO v_offer_id;
         END IF;
 
         INSERT INTO ratings (
-            offer_id,
+            v_offer_id,
             client_user_id,
             rating,
             comment,
@@ -360,7 +360,7 @@ BEGIN
             updated_at
         )
         VALUES (
-            offer_id,
+            v_offer_id,
             client_user_account_id,
             ((i - 1) % 5) + 1,
             FORMAT('Mock feedback #%s - enjoyable sessions!', i),
@@ -371,7 +371,7 @@ BEGIN
 
         INSERT INTO reports (
             reported_by_user_id,
-            offer_id,
+            v_offer_id,
             reported_user_id,
             reason,
             details,
@@ -384,7 +384,7 @@ BEGIN
         )
         VALUES (
             client_user_account_id,
-            offer_id,
+            v_offer_id,
             CASE WHEN i % 2 = 0 THEN pt_user_account_id ELSE gym_staff_user_id END,
             FORMAT('Mock report reason #%s', i),
             'Auto-generated mock report for QA scenarios.',
