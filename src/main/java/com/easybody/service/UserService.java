@@ -39,6 +39,10 @@ public class UserService {
     }
 
     public UserResponse getUserByCognitoSub(String cognitoSub) {
+        // Local dev: Basic Auth username maps to seeded admin cognito sub
+        if ("local-admin".equals(cognitoSub)) {
+            cognitoSub = "seed-admin-sub";
+        }
         User user = userRepository.findByCognitoSub(cognitoSub)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         return mapToResponse(user);
@@ -75,4 +79,3 @@ public class UserService {
                 .build();
     }
 }
-
